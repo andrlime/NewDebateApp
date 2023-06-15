@@ -1,0 +1,21 @@
+{
+  "name": "frontend",
+  "version": "2.0.0",
+  "description": "New version of debate app, frontend",
+  "main": "index.js",
+  "repository": "https://github.com/andrlime/NewDebateApp",
+  "author": "Andrew Li",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@mantine/core": "^6.0.13",
+    "next": "^13.4.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router": "^6.13.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.3"
+  }
+}
