@@ -3,13 +3,13 @@ import type { NextPage } from 'next';
 import React from 'react';
 import DLCAppShell from '../lib/components/DLCAppShell';
 
-const Home: NextPage = () => {
+const ViewJudges: NextPage = () => {
   return (
-    <DLCAppShell active_index={0}>
+    <DLCAppShell active_index={1}>
       
     </DLCAppShell>
   );
 };
 
-export default Home;
+export default ViewJudges;
 

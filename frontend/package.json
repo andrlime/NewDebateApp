@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "@dlc/frontend",
   "version": "2.0.0",
   "description": "New version of debate app, frontend",
   "main": "index.js",

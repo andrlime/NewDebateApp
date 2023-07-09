@@ -5,18 +5,18 @@ import DLCHeader from './DLCHeader';
 import DLCNavBar from './DLCNavBar';
 import UserIcon from './UserIcon';
 
-const DLCAppShell: React.FC<{children: ReactNode}> = ({children}) => {
+const DLCAppShell: React.FC<{children: ReactNode, active_index: number}> = ({children, active_index}) => {
   const [showNav, setShowNav] = React.useState(true);
 
   return (
     <AppShell
-      padding="md"
+      padding="sm"
       navbar={<Navbar width={{ base: showNav ? 300 : 60 }} p="xs">
         <Navbar.Section>
         </Navbar.Section>
 
         <Navbar.Section grow mt="md">
-          <DLCNavBar/>
+          <DLCNavBar active={active_index}/>
         </Navbar.Section>
 
         <Navbar.Section>

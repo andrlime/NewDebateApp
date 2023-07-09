@@ -3,13 +3,13 @@ import type { NextPage } from 'next';
 import React from 'react';
 import DLCAppShell from '../lib/components/DLCAppShell';
 
-const Home: NextPage = () => {
+const PairRounds: NextPage = () => {
   return (
-    <DLCAppShell active_index={0}>
+    <DLCAppShell active_index={2}>
       
     </DLCAppShell>
   );
 };
 
-export default Home;
+export default PairRounds;
 
