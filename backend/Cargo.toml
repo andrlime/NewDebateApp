@@ -1,0 +1,15 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bson = "2.6.1"
+chrono = "0.4.26"
+dotenv = "0.15.0"
+mongodb = "2.6.0"
+serde = "1.0.170"
+tokio = "1.29.1"
+warp = "0.3.5"
