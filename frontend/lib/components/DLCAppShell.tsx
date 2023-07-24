@@ -4,6 +4,7 @@ import { AppShell, Navbar } from '@mantine/core';
 import DLCHeader from './DLCHeader';
 import DLCNavBar from './DLCNavBar';
 import UserIcon from './UserIcon';
+import Head from 'next/head';
 
 const DLCAppShell: React.FC<{children: ReactNode, active_index: number}> = ({children, active_index}) => {
   const [showNav, setShowNav] = React.useState(true);
@@ -25,6 +26,10 @@ const DLCAppShell: React.FC<{children: ReactNode, active_index: number}> = ({chi
       </Navbar>}
       header={<DLCHeader/>}
     >
+      <Head>
+        <title>Tabroom Tools v1.1</title>
+        <link rel="icon" type="image/x-icon" href={"icon.png"} />
+      </Head>
       {children}
     </AppShell>
   );
