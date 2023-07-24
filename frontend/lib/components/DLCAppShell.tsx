@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { AppShell, Navbar } from '@mantine/core';
 import DLCHeader from './DLCHeader';
 import DLCNavBar from './DLCNavBar';
@@ -8,6 +8,11 @@ import Head from 'next/head';
 
 const DLCAppShell: React.FC<{children: ReactNode, active_index: number}> = ({children, active_index}) => {
   const [showNav, setShowNav] = React.useState(true);
+
+  // get the backend url from .env file
+  useEffect(() => {
+
+  }, [])
 
   return (
     <AppShell

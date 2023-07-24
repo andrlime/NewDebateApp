@@ -4,6 +4,7 @@ import { AppShell, Flex, Button, Paper, Text, TextInput, useMantineTheme, Center
 import DLCHeader from '../lib/components/DLCHeader';
 import Head from 'next/head';
 import { NextPage } from 'next';
+import Link from 'next/link';
 
 const EM_RX = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/g;
 
@@ -57,7 +58,7 @@ const SignupPage: NextPage = () => {
 
         <Paper shadow='xs' p='md' radius='md' withBorder style={{width: "40%", minWidth: "450px"}}>
           <Flex direction="column" gap="md">
-            <Text align='center' weight={800}>Signup</Text>
+            <Text align='center' weight={600}>Signup</Text>
             <TextInput label='Email' required value={em} onChange={(e) => setEm(e.target.value)} error={emError} />
             <TextInput label='Confirm Email' required value={cem} onChange={(e) => setCem(e.target.value)} error={cemError} />
             <PasswordInput label='Password' required value={pass} onChange={(e) => setPass(e.target.value)} />
@@ -76,6 +77,8 @@ const SignupPage: NextPage = () => {
                   Signup
               </Button>
             </Center>
+
+            <Text align='center' size="sm">Already a user? <Link href="/login" style={{textDecoration: "underline"}}>Login</Link></Text>
           </Flex>
         </Paper>
 

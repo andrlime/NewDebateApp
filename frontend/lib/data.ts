@@ -1,4 +1,4 @@
-import { IconGavel, IconArrowsDoubleNeSw, IconPercentage, IconGridPattern } from "@tabler/icons-react";
+import { IconGavel, IconArrowsDoubleNeSw, IconPercentage, IconGridPattern, IconBrain } from "@tabler/icons-react";
 import { INavigationItem } from "./interfaces";
 
 export const NAV_BAR_DATA: Array<INavigationItem> = [
@@ -30,4 +30,11 @@ export const NAV_BAR_DATA: Array<INavigationItem> = [
         desc: "Judge evaluation system",
         perm: 3
     },
+    {
+        label: "Manage Users",
+        to: "/users",
+        icon: IconBrain,
+        desc: "Manage and invite users",
+        perm: 55
+    }
 ];
