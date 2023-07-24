@@ -1,6 +1,5 @@
 import React, { FC, useEffect } from "react";
-import { NavLink } from "@mantine/core"
-import { IconArrowsDoubleNeSw, IconGavel, IconGridPattern, IconPercentage, IconTournament, TablerIconsProps } from "@tabler/icons-react";
+import { NavLink } from "@mantine/core";
 import { INavigationItem } from "../interfaces";
 import { NAV_BAR_DATA } from "../data";
 
@@ -8,7 +7,7 @@ import { useSelector } from 'react-redux'
 import { RootState } from '../store/reducers/reduce';
 import { useRouter } from "next/router";
 
-const NaviItem: React.FC<INavigationItem & {active: boolean}> = ({label, to, icon: IconComponent, desc, perm, active}) => {
+const NaviItem: React.FC<INavigationItem & {active: boolean}> = ({label, to, icon: IconComponent, desc, perm: _, active}) => {
     return (
         <NavLink
             description={desc} 
@@ -38,9 +37,9 @@ export const DLCNavBar: React.FC<{active: number}> = ({active}) => {
                 desc={item.desc}
                 to={item.to}
                 icon={item.icon}
-                perm={item.perm}
                 key={`nav-item-${index}`}
                 active={index===active}
+                perm={item.perm}
             />
         ) : "")}
     </>);

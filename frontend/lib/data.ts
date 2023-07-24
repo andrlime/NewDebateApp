@@ -31,10 +31,10 @@ export const NAV_BAR_DATA: Array<INavigationItem> = [
         perm: 3
     },
     {
-        label: "Manage Users",
+        label: "Invite Users",
         to: "/users",
         icon: IconBrain,
-        desc: "Manage and invite users",
-        perm: 55
+        desc: "Invite users",
+        perm: 5
     }
 ];

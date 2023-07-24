@@ -42,3 +42,34 @@ pub struct Judge {
     pub paradigm: String,
     pub options: Paradigm
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct User {
+    pub _id: ObjectId,
+    pub email: String,
+    pub name: String,
+    pub password: String,  // This should store a hashed version of the password, never plain text
+    pub permission_level: i32,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct FrontendUser {
+    pub email: String,
+    pub name: String,
+    pub permission_level: i32,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct InviteCode {
+    pub _id: ObjectId,
+    pub code: String,
+    pub email: String,
+    pub permission_level: i32,
+    pub name: String
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Login {
+    pub email: String,
+    pub password: String
+}

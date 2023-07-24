@@ -7,7 +7,9 @@ export const envSlice = createSlice({
     backendUrl: "localhost:9093"
   },
   reducers: {
-    changeBackendUrl: (state, payload) => state.backendUrl = payload.payload
+    changeBackendUrl: (state, action) => {
+      state.backendUrl = action.payload
+    }
   }
 })
 
