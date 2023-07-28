@@ -154,10 +154,12 @@ pub async fn create_user(new_user: CreateBody, client: Arc<Mutex<Client>>) -> Re
         let new_user_doc = bson::to_bson(&new_user).unwrap().as_document().unwrap().clone();
         users.insert_one(new_user_doc, None).await.unwrap();
 
-        Ok(warp::reply::with_status(
-          warp::reply::json(&invite_code.name),
-          StatusCode::OK,
-        ))
+        // TODO Add token
+        let response = warp::reply::json(&Response {
+            user: new_user,
+        });
+
+        Ok(response)
     } else {
       Ok(warp::reply::with_status(
         warp::reply::json(&"Invite code incorrect"),

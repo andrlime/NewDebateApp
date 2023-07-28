@@ -95,7 +95,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .with(cors);
 
     warp::serve(routes)
-        .run(([127, 0, 0, 1], 3030))
+        .run(([0, 0, 0, 0], 3030))
         .await;
 
     Ok(())
