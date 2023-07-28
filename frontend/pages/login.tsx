@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../lib/store/reducers/reduce';
 import axios from 'axios';
 import { changeBackendUrl } from '../lib/store/slices/env';
-import { setName, setEmail, login } from '../lib/store/slices/auth';
+import { setName, setEmail, login, setPermLevel } from '../lib/store/slices/auth';
 import { useRouter } from 'next/router';
 
 const EM_RX = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/g;
@@ -65,9 +65,12 @@ const LoginPage: NextPage = () => {
         }
 
         let result  = res.data.user;
+
+        console.log(result);
         
         dispatch(setName(result.name));
         dispatch(setEmail(result.email));
+        dispatch(setPermLevel(result.permission_level));
         dispatch(login());
         router.push("/"); // implement routing, and tokens
 

@@ -24,9 +24,12 @@ export const authSlice = createSlice({
     setEmail: (state, payload) => {
       state.email = payload.payload
     },
+    setPermLevel: (state, payload) => {
+      state.perm = payload.payload
+    }
   }
 })
 
-export const { login, logout, setName, setEmail } = authSlice.actions
+export const { login, logout, setName, setEmail, setPermLevel } = authSlice.actions
 
 export default authSlice.reducer
