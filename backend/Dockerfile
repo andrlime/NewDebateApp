@@ -3,10 +3,11 @@ FROM rust:1.68 AS builder
 WORKDIR /usr/src/app
 
 # Cache dependencies
+COPY ./Cargo.toml ./Cargo.toml
+
 RUN mkdir src/ && echo "fn main() {println!(\"if you see this, the build broke\")}" > src/main.rs && \
     cargo build --release && rm -rf src/
 
-COPY ./Cargo.toml ./Cargo.toml
 COPY ./src ./src
 
 RUN cargo build --release
