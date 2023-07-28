@@ -27,7 +27,7 @@ export const InviteUsers: React.FC<IInviteUsers> = () => {
         if(!email || !name || !permLevel) return;
 
         let req = {
-            email: email,
+            email: email.toLowerCase(),
             name: name,
             permission_level: permLevel as number
         }

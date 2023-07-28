@@ -143,7 +143,7 @@ pub async fn create_user(new_user: CreateBody, client: Arc<Mutex<Client>>) -> Re
         // Hash the password
         let password_hash = hash(&new_user.password, DEFAULT_COST).unwrap();
 
-        let new_user = models::User {
+        let new_user_to_make = models::User {
             _id: ObjectId::new(),
             email: new_user.email,
             name: invite_code.name.clone(),  // Use the name from the invite code
@@ -151,15 +151,36 @@ pub async fn create_user(new_user: CreateBody, client: Arc<Mutex<Client>>) -> Re
             permission_level: invite_code.permission_level,  // Set the permission level from the invite code
         };
 
-        let new_user_doc = bson::to_bson(&new_user).unwrap().as_document().unwrap().clone();
+        let new_user_doc = bson::to_bson(&new_user_to_make).unwrap().as_document().unwrap().clone();
         users.insert_one(new_user_doc, None).await.unwrap();
 
+        let user_info = models::FrontendUser {
+            name: new_user_to_make.name,
+            email: new_user_to_make.email,
+            permission_level: new_user_to_make.permission_level,
+        };
+
         // TODO Add token
+        let my_claims = Claims {
+            sub: user_info.email.to_owned(),
+            exp: (SystemTime::now() + Duration::from_secs(60*60*24*7)).duration_since(UNIX_EPOCH).unwrap().as_secs() as usize,  // Token valid for 1 week
+        };
+
+        dotenv().ok();
+        let secret = dotenv::var("SECRET").expect("SECRET must be set");
+
+        let key = EncodingKey::from_secret(secret.as_ref());
+        let user_token = encode(&Header::default(), &my_claims, &key).unwrap();
+
         let response = warp::reply::json(&Response {
-            user: new_user,
+            token: user_token,
+            user: user_info,
         });
 
-        Ok(response)
+        Ok(warp::reply::with_status(
+            response,
+            StatusCode::OK,
+        ))
     } else {
       Ok(warp::reply::with_status(
         warp::reply::json(&"Invite code incorrect"),

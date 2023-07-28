@@ -48,7 +48,7 @@ const LoginPage: NextPage = () => {
 
   const loginFunction = () => {
     const req = {
-      email: user,
+      email: user.toLowerCase(),
       password: pass // this sends in plain text <!!!! WARN !!!!>
     }
 
@@ -56,6 +56,8 @@ const LoginPage: NextPage = () => {
 
     axios.post(`${backendUrl}/auth/validate`, req)
       .then(res => {
+        setLoading(false);
+
         if(res.data === "Incorrect password") {
           setPError("Incorrect password");
           return;
@@ -65,16 +67,12 @@ const LoginPage: NextPage = () => {
         }
 
         let result  = res.data.user;
-
-        console.log(result);
         
         dispatch(setName(result.name));
         dispatch(setEmail(result.email));
         dispatch(setPermLevel(result.permission_level));
         dispatch(login());
         router.push("/"); // implement routing, and tokens
-
-        setLoading(false);
       })
       .catch(err => {
         console.log(err);

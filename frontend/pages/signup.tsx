@@ -10,7 +10,7 @@ import { changeBackendUrl } from '../lib/store/slices/env';
 import axios from 'axios';
 import router from 'next/router';
 import { RootState } from '../lib/store/reducers/reduce';
-import { setName, setEmail } from '../lib/store/slices/auth';
+import { setName, setEmail, setPermLevel } from '../lib/store/slices/auth';
 import { login } from '../lib/store/slices/auth';
 
 const EM_RX = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/g;
@@ -64,7 +64,7 @@ const SignupPage: NextPage = () => {
   
   const signup = () => {
     const req = {
-      email: em,
+      email: em.toLowerCase(),
       password: pass,
       code: inv
     };
@@ -72,12 +72,13 @@ const SignupPage: NextPage = () => {
 
     axios.post(`${backendUrl}/auth/create`, req)
       .then(res => {
-        dispatch(setName(res.data));
-        dispatch(setEmail(em));
+        setLoading(false);
+
+        dispatch(setName(res.data.user.name));
+        dispatch(setEmail(res.data.user.email));
+        dispatch(setPermLevel(res.data.user.permission_level))
         dispatch(login());
         router.push("/"); // implement routing, and tokens
-
-        setLoading(false);
       })
       .catch(err => {
         switch(err.response.data) {
