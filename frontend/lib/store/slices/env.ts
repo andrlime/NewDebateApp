@@ -4,7 +4,7 @@ export const envSlice = createSlice({
   name: '_AUTH',
   initialState: {
     dev: false,
-    backendUrl: "localhost:9093"
+    backendUrl: "http://localhost:3030"
   },
   reducers: {
     changeBackendUrl: (state, action) => {

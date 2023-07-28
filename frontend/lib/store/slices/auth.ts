@@ -6,7 +6,7 @@ export const authSlice = createSlice({
     login: false,
     name: "NOT LOGGED IN",
     email: "NOT LOGGED IN",
-    perm: 59,
+    perm: 1,
   },
   reducers: {
     login: state => {
@@ -14,6 +14,9 @@ export const authSlice = createSlice({
     },
     logout: state => {
       state.login = false;
+      state.name = "NOT LOGGED IN";
+      state.email = "NOT LOGGED IN";
+      state.perm = 1;
     },
     setName: (state, payload) => {
       state.name = payload.payload

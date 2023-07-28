@@ -7,7 +7,7 @@ export const NAV_BAR_DATA: Array<INavigationItem> = [
         to: "/",
         icon: IconGridPattern,
         desc: "See judge paradigms",
-        perm: 2
+        perm: 1
     },
     {
         label: "Judge Database",
@@ -21,7 +21,7 @@ export const NAV_BAR_DATA: Array<INavigationItem> = [
         to: "/pair",
         icon: IconArrowsDoubleNeSw,
         desc: "Generate pairings",
-        perm: 3
+        perm: 2
     },
     {
         label: "Evaluate Judges",

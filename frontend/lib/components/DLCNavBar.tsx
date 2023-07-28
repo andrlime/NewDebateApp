@@ -25,8 +25,8 @@ export const DLCNavBar: React.FC<{active: number}> = ({active}) => {
     const router = useRouter();
 
     useEffect(() => {
-        if(permLevel < NAV_BAR_DATA[active].perm) {
-            router.push(`/login?path=${NAV_BAR_DATA[active].to}`, '/login')
+        if(permLevel < (NAV_BAR_DATA[active] || {perm: 0}).perm) {
+            router.push(`/login?path=${NAV_BAR_DATA[active].to}`, '/login'); // TODO
         }
     }, [permLevel]);
 

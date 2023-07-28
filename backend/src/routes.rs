@@ -135,7 +135,7 @@ pub async fn create_user(new_user: CreateBody, client: Arc<Mutex<Client>>) -> Re
         // Check that the email matches
         if new_user.email != invite_code.email {
             return Ok(warp::reply::with_status(
-              warp::reply::json(&"Forbidden"),
+              warp::reply::json(&"Email incorrect"),
               StatusCode::FORBIDDEN,
             ));
         }
@@ -146,7 +146,7 @@ pub async fn create_user(new_user: CreateBody, client: Arc<Mutex<Client>>) -> Re
         let new_user = models::User {
             _id: ObjectId::new(),
             email: new_user.email,
-            name: invite_code.name,  // Use the name from the invite code
+            name: invite_code.name.clone(),  // Use the name from the invite code
             password: password_hash,
             permission_level: invite_code.permission_level,  // Set the permission level from the invite code
         };
@@ -155,12 +155,12 @@ pub async fn create_user(new_user: CreateBody, client: Arc<Mutex<Client>>) -> Re
         users.insert_one(new_user_doc, None).await.unwrap();
 
         Ok(warp::reply::with_status(
-          warp::reply::json(&"Okay"),
+          warp::reply::json(&invite_code.name),
           StatusCode::OK,
         ))
     } else {
       Ok(warp::reply::with_status(
-        warp::reply::json(&"Forbidden"),
+        warp::reply::json(&"Invite code incorrect"),
         StatusCode::FORBIDDEN,
       ))
     }

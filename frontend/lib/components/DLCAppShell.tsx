@@ -42,7 +42,7 @@ const DLCAppShell: React.FC<{children: ReactNode, active_index: number}> = ({chi
         <title>Tabroom Tools v1.1</title>
         <link rel="icon" type="image/x-icon" href={"icon.png"} />
       </Head>
-      <div style={{height: "100%", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center"}}>
+      <div style={{height: "100%", display: "flex", flexDirection: "column"}}>
         {children}
       </div>
     </AppShell>

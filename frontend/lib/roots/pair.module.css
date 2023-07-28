@@ -1,0 +1,10 @@
+.judge:hover {
+    background-color: #EEE;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+}
+
+.judge {
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+}
