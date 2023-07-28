@@ -80,6 +80,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .and(client_filter.clone())
         .and_then(create_invite_code)
         .with(cors.clone());
+
+    let empty_route = warp::path::end()
+        .map(|| warp::reply::with_status("OK", warp::http::StatusCode::OK));
     
     let routes = get_judges_route
         .or(create_invite_code_route)
@@ -88,8 +91,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .or(create_user_route)
         .or(validate_user_route)
         .or(get_users_route)
+        .or(empty_route)
         .with(cors);
-    
+
     warp::serve(routes)
         .run(([127, 0, 0, 1], 3030))
         .await;
