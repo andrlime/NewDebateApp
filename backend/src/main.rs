@@ -1,12 +1,6 @@
 mod routes;
-mod models;
 mod db;
-
-// use warp::http::StatusCode;
-// use serde::{Deserialize, Serialize};
-// use std::convert::Infallible;
-// use bson::oid::ObjectId;
-// use std::str::FromStr;
+mod models;
 
 use warp::Filter;
 use std::error::Error;

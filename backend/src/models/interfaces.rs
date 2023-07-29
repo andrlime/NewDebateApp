@@ -1,9 +1,11 @@
+//models/interfaces.rs
 use serde::{Deserialize, Serialize};
 use mongodb::bson::DateTime;
 use bson::oid::ObjectId;
 
+// types of data
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Evaluation {
+pub struct IEvaluation {
     #[serde(rename = "tournamentName")]
     pub tournament_name: String,
 
@@ -26,7 +28,7 @@ pub struct Evaluation {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Paradigm {
+pub struct IParadigm {
     pub nationality: String,
     pub gender: String,
     pub age: String,
@@ -34,17 +36,17 @@ pub struct Paradigm {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct Judge {
+pub struct IJudge {
     pub _id: ObjectId,
     pub name: String,
     pub email: String,
-    pub evaluations: Vec<Evaluation>,
+    pub evaluations: Vec<IEvaluation>,
     pub paradigm: String,
-    pub options: Paradigm
+    pub options: IParadigm
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct User {
+pub struct IUser {
     pub _id: ObjectId,
     pub email: String,
     pub name: String,
@@ -53,23 +55,17 @@ pub struct User {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct FrontendUser {
+pub struct IFrontendUser {
     pub email: String,
     pub name: String,
     pub permission_level: i32,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct InviteCode {
+pub struct IInviteCode {
     pub _id: ObjectId,
     pub code: String,
     pub email: String,
     pub permission_level: i32,
     pub name: String
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Login {
-    pub email: String,
-    pub password: String
 }
