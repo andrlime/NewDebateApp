@@ -15,6 +15,7 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use routes::{get_judges, update_judge, create_judge, create_user, validate_user, create_invite_code, get_all_invite_codes};
 use log::info;
+use std::env;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
