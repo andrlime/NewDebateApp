@@ -25,5 +25,5 @@ FROM ubuntu:lunar
 COPY --from=builder /usr/src/app/target/release/backend /usr/local/bin
 CMD ["backend"]
 
-# Expose port 3030
+# Expose port
 EXPOSE $PORT
