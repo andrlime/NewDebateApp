@@ -94,8 +94,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .or(empty_route)
         .with(cors);
 
+    let port = env::var("PORT")
+        .unwrap_or_else(|_| String::from("3030"))
+        .parse()
+        .expect("PORT must be a number");
+
     warp::serve(routes)
-        .run(([0, 0, 0, 0], 3030))
+        .run(([0, 0, 0, 0], port))
         .await;
 
     Ok(())
