@@ -1,40 +1,22 @@
-use warp::http::StatusCode;
-use std::convert::Infallible;
-use tokio;
-use bson::oid::ObjectId;
-use std::sync::Arc;
-use tokio::sync::Mutex;
-use std::str::FromStr;
-use serde::{Deserialize, Serialize};
-use mongodb::Client;
-use futures::stream::StreamExt;
-use nanoid::nanoid;
-use bcrypt::verify;
-use jsonwebtoken::{encode, EncodingKey, Header};
-use bcrypt::{hash, DEFAULT_COST};
-use bson::doc;
-use std::time::UNIX_EPOCH;
-use std::time::SystemTime;
-use std::time::Duration;
+use bcrypt::{hash, verify, DEFAULT_COST};
+use bson::{doc, oid::ObjectId};
 use dotenv::dotenv;
-use log::info;
-use log::error;
+use futures::stream::StreamExt;
+use jsonwebtoken::{encode, EncodingKey, Header};
+use log::{error, info};
+use mongodb::Client;
+use nanoid::nanoid;
+use std::convert::Infallible;
 use std::process;
+use std::str::FromStr;
+use std::sync::Arc;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use tokio;
+use tokio::sync::Mutex;
+use warp::http::StatusCode;
 
-use crate::models;
-
-#[derive(Serialize, Deserialize)]
-pub struct UpdateJudgeBody {
-    id: String,
-    name: Option<String>,
-    email: Option<String>,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct CreateJudgeBody {
-    name: String,
-    email: String,
-}
+use crate::models::interfaces::*; 
+use crate::models::requests::*;
 
 // /get/judges - route to get all judges
 pub async fn get_judges(client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
@@ -43,10 +25,10 @@ pub async fn get_judges(client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, 
     let judges = (*client).database("judges").collection("judges");
 
     let cursor = judges.find(None, None).await.unwrap();
-    let result: Vec<models::Judge> = cursor.filter_map(|doc| async {
+    let result: Vec<IJudge> = cursor.filter_map(|doc| async {
         match doc {
             Ok(document) => {
-                let judge: Option<models::Judge> = bson::from_bson(bson::Bson::Document(document)).ok();
+                let judge: Option<IJudge> = bson::from_bson(bson::Bson::Document(document)).ok();
                 judge
             }
             _ => None,
@@ -64,10 +46,10 @@ pub async fn get_all_invite_codes(client: Arc<Mutex<Client>>) -> Result<impl war
     let invite_codes = (*client).database("users").collection("invite_codes");
 
     let cursor = invite_codes.find(None, None).await.unwrap();
-    let result: Vec<models::InviteCode> = cursor.filter_map(|doc| async {
+    let result: Vec<IInviteCode> = cursor.filter_map(|doc| async {
         match doc {
             Ok(document) => {
-                let invite_code: Option<models::InviteCode> = bson::from_bson(bson::Bson::Document(document)).ok();
+                let invite_code: Option<IInviteCode> = bson::from_bson(bson::Bson::Document(document)).ok();
                 invite_code
             }
             _ => None,
@@ -79,7 +61,7 @@ pub async fn get_all_invite_codes(client: Arc<Mutex<Client>>) -> Result<impl war
 }
 
 // /update/judge - route to update judge metadata
-pub async fn update_judge(update: UpdateJudgeBody, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
+pub async fn update_judge(update: BUpdateJudge, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /update/judge");
     let client = client.lock().await;
     let judges = (*client).database("judges").collection::<bson::Document>("judges");
@@ -97,17 +79,17 @@ pub async fn update_judge(update: UpdateJudgeBody, client: Arc<Mutex<Client>>) -
 }
 
 // /create/judge - route to create a new judge
-pub async fn create_judge(new_judge: CreateJudgeBody, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
+pub async fn create_judge(new_judge: BCreateJudge, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /create/judge");
     let client = client.lock().await;
     let judges = (*client).database("judges").collection::<bson::Document>("judges");
     
-    let new_judge = models::Judge {
+    let new_judge = IJudge {
         _id: ObjectId::new(),
         name: new_judge.name,
         email: new_judge.email,
         evaluations: Vec::new(),
-        options: models::Paradigm {
+        options: IParadigm {
             nationality: String::new(),
             gender: String::new(),
             age: String::new(),
@@ -122,15 +104,8 @@ pub async fn create_judge(new_judge: CreateJudgeBody, client: Arc<Mutex<Client>>
     Ok(StatusCode::OK)
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct CreateBody {
-    pub email: String,
-    pub password: String,
-    pub code: String,  // Invite code
-}
-
 // /auth/create - create a new user via checking the invite code
-pub async fn create_user(new_user: CreateBody, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
+pub async fn create_user(new_user: BCreateUser, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /auth/create");
     let client = client.lock().await;
     let users = (*client).database("users").collection::<bson::Document>("users");
@@ -151,7 +126,7 @@ pub async fn create_user(new_user: CreateBody, client: Arc<Mutex<Client>>) -> Re
     let result = invite_codes.find_one(filter, None).await.unwrap();
 
     if let Some(invite_code_doc) = result {
-        let invite_code: models::InviteCode = bson::from_bson(bson::Bson::Document(invite_code_doc)).unwrap();
+        let invite_code: IInviteCode = bson::from_bson(bson::Bson::Document(invite_code_doc)).unwrap();
         
         // Check that the email matches
         if new_user.email != invite_code.email {
@@ -164,7 +139,7 @@ pub async fn create_user(new_user: CreateBody, client: Arc<Mutex<Client>>) -> Re
         // Hash the password
         let password_hash = hash(&new_user.password, DEFAULT_COST).unwrap();
 
-        let new_user_to_make = models::User {
+        let new_user_to_make = IUser {
             _id: ObjectId::new(),
             email: new_user.email,
             name: invite_code.name.clone(),  // Use the name from the invite code
@@ -175,13 +150,13 @@ pub async fn create_user(new_user: CreateBody, client: Arc<Mutex<Client>>) -> Re
         let new_user_doc = bson::to_bson(&new_user_to_make).unwrap().as_document().unwrap().clone();
         users.insert_one(new_user_doc, None).await.unwrap();
 
-        let user_info = models::FrontendUser {
+        let user_info = IFrontendUser {
             name: new_user_to_make.name,
             email: new_user_to_make.email,
             permission_level: new_user_to_make.permission_level,
         };
 
-        let my_claims = Claims {
+        let token_response = RToken {
             sub: user_info.email.to_owned(),
             exp: (SystemTime::now() + Duration::from_secs(60*60*24*7)).duration_since(UNIX_EPOCH).unwrap().as_secs() as usize,  // Token valid for 1 week
         };
@@ -193,9 +168,9 @@ pub async fn create_user(new_user: CreateBody, client: Arc<Mutex<Client>>) -> Re
         });
 
         let key = EncodingKey::from_secret(secret.as_ref());
-        let user_token = encode(&Header::default(), &my_claims, &key).unwrap();
+        let user_token = encode(&Header::default(), &token_response, &key).unwrap();
 
-        let response = warp::reply::json(&Response {
+        let response = warp::reply::json(&RValidate {
             token: user_token,
             user: user_info,
         });
@@ -212,21 +187,8 @@ pub async fn create_user(new_user: CreateBody, client: Arc<Mutex<Client>>) -> Re
     }
 }
 
-// Struct for the token data
-#[derive(Debug, Serialize, Deserialize)]
-struct Claims {
-    sub: String,
-    exp: usize,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Response {
-  token: String,
-  user: models::FrontendUser,
-}
-
 // /auth/validate - login route, check if user is valid
-pub async fn validate_user(login_data: models::Login, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
+pub async fn validate_user(login_data: BLogin, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /auth/validate");
     let client = client.lock().await;
     let users = (*client).database("users").collection::<bson::Document>("users");
@@ -236,13 +198,13 @@ pub async fn validate_user(login_data: models::Login, client: Arc<Mutex<Client>>
     let result = users.find_one(filter, None).await.unwrap();
 
     if let Some(user_doc) = result {
-        let user: models::User = bson::from_bson(bson::Bson::Document(user_doc)).unwrap();
+        let user: IUser = bson::from_bson(bson::Bson::Document(user_doc)).unwrap();
 
         // Check the password
         if verify(&login_data.password, &user.password).unwrap() {
             // Password is correct, create and send a JWT
 
-            let my_claims = Claims {
+            let token_response = RToken {
                 sub: user.email.to_owned(),
                 exp: (SystemTime::now() + Duration::from_secs(60*60*24*7)).duration_since(UNIX_EPOCH).unwrap().as_secs() as usize,  // Token valid for 1 week
             };
@@ -254,15 +216,15 @@ pub async fn validate_user(login_data: models::Login, client: Arc<Mutex<Client>>
             });
 
             let key = EncodingKey::from_secret(secret.as_ref());
-            let token = encode(&Header::default(), &my_claims, &key).unwrap();
+            let token = encode(&Header::default(), &token_response, &key).unwrap();
 
-            let user_info = models::FrontendUser {
+            let user_info = IFrontendUser {
               name: user.name,
               email: user.email,
               permission_level: user.permission_level,
             };
             
-            let response = warp::reply::json(&Response {
+            let response = warp::reply::json(&RValidate {
                 token: token,
                 user: user_info,
             });
@@ -277,15 +239,8 @@ pub async fn validate_user(login_data: models::Login, client: Arc<Mutex<Client>>
     return Ok(warp::reply::json(&"User not found"))
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct InviteCodeBody {
-    email: String,
-    name: String,
-    permission_level: i32
-}
-
 // /auth/invite - create a new user invite code
-pub async fn create_invite_code(body: InviteCodeBody, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
+pub async fn create_invite_code(body: BInviteCode, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /auth/invite");
     let client = client.lock().await;
     let invite_codes = (*client).database("users").collection::<bson::Document>("invite_codes");
@@ -301,7 +256,7 @@ pub async fn create_invite_code(body: InviteCodeBody, client: Arc<Mutex<Client>>
     // Generate a unique invite code
     let code = nanoid!(8, &alphabet);
 
-    let new_invite_code = models::InviteCode {
+    let new_invite_code = IInviteCode {
         _id: ObjectId::new(),
         code: code.clone(),
         email: body.email,
