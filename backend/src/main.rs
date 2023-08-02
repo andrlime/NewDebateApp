@@ -7,7 +7,7 @@ use std::error::Error;
 use tokio;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use routes::{get_judges, update_judge, create_judge, create_user, validate_user, create_invite_code, get_all_invite_codes, delete_judge};
+use routes::{get_judges, update_judge, create_judge, create_user, validate_user, create_invite_code, get_all_invite_codes, delete_judge, delete_user};
 use log::info;
 use log::error;
 use std::env;
@@ -59,6 +59,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .and(warp::body::json())
         .and(client_filter.clone())
         .and_then(delete_judge);
+
+    info!("Creating route at /delete/user");
+
+    let delete_user_route = warp::path("delete")
+        .and(warp::path("user"))
+        .and(warp::path::end())
+        .and(warp::body::json())
+        .and(client_filter.clone())
+        .and_then(delete_user);
 
     info!("Creating route at /update/judge");
 
@@ -124,6 +133,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .or(validate_user_route)
         .or(get_users_route)
         .or(delete_judge_route)
+        .or(delete_user_route)
         .or(empty_route)
         .with(cors);
 

@@ -89,6 +89,63 @@ pub async fn delete_judge(request: BDeleteJudge, client: Arc<Mutex<Client>>) -> 
     }
 }
 
+// /delete/user - route to delete a judge
+pub async fn delete_user(request: BDeleteUser, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
+    info!("Received request at /delete/judge");
+    let client = client.lock().await;
+    let users = (*client).database("users").collection::<bson::Document>("users");
+    let invite_codes = (*client).database("users").collection::<bson::Document>("invite_codes");
+
+    let filter = bson::doc! { "email": request.email.clone() };
+
+    // Attempt to delete from the "users" collection
+    let delete_result_users = users.delete_one(filter.clone(), None).await;
+    match delete_result_users {
+        Ok(_result) => {
+            info!("Deleted user with email {}", request.email.clone());
+        }
+        Err(e) => {
+            error!("Error occurred while deleting from 'users': {:?}", e);
+            let response = warp::reply::json(&RMessage {
+                message: "Failed to delete document".to_string()
+            });
+
+            return Ok(warp::reply::with_status(
+                response,
+                StatusCode::INTERNAL_SERVER_ERROR,
+            ))
+        }
+    }
+
+    // Attempt to delete from the "invite_codes" collection
+    let delete_result_invite_codes = invite_codes.delete_one(filter.clone(), None).await;
+    match delete_result_invite_codes {
+        Ok(_result) => {
+            info!("Deleted invite code for email {}", request.email.clone());
+        }
+        Err(e) => {
+            error!("Error occurred while deleting from 'invite_codes': {:?}", e);
+            let response = warp::reply::json(&RMessage {
+                message: "Failed to delete document".to_string()
+            });
+
+            return Ok(warp::reply::with_status(
+                response,
+                StatusCode::INTERNAL_SERVER_ERROR,
+            ))
+        }
+    }
+
+    let response = warp::reply::json(&RMessage {
+        message: "Successfully deleted user".to_string()
+    });
+
+    Ok(warp::reply::with_status(
+        response,
+        StatusCode::OK,
+    ))
+}
+
 // /get/users - route to get all users with invite code
 pub async fn get_all_invite_codes(client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /get/users");

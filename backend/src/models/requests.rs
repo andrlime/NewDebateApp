@@ -53,6 +53,11 @@ pub struct BDeleteJudge {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+pub struct BDeleteUser {
+    pub email: String
+}
+
+#[derive(Debug, Deserialize, Serialize)]
 pub struct BToken {
     pub token: String, // auth token
 }
