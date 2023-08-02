@@ -39,6 +39,56 @@ pub async fn get_judges(client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, 
     Ok(warp::reply::json(&result))
 }
 
+// /delete/judge - route to delete a judge
+pub async fn delete_judge(request: BDeleteJudge, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
+    info!("Received request at /delete/judge");
+    let client = client.lock().await;
+    let judges = (*client).database("judges").collection::<IJudge>("judges");
+
+    let id = match ObjectId::from_str(&request.id) {
+        Ok(oid) => oid,
+        Err(e) => panic!("Error converting string to ObjectId: {}", e),
+    };
+    let filter = bson::doc! { "_id": id };
+
+    // Attempt to delete one document matching the filter.
+    // `delete_one` returns a `Result<DeleteResult>`.
+    match judges.delete_one(filter, None).await {
+        Ok(delete_result) => {
+            if delete_result.deleted_count == 0 {
+                info!("Judge not found {}", request.id);
+                let response = warp::reply::json(&RMessage {
+                    message: "Judge not found".to_string()
+                });
+                Ok(warp::reply::with_status(
+                    response,
+                    StatusCode::NOT_FOUND,
+                ))
+            } else {
+                info!("Judge deleted {}", request.id);
+                let response = warp::reply::json(&RMessage {
+                    message: "Deleted successfully".to_string()
+                });
+                Ok(warp::reply::with_status(
+                    response,
+                    StatusCode::OK,
+                ))
+            }
+        },
+        Err(e) => {
+            error!("Failed to delete document: {}", e);
+            let response = warp::reply::json(&RMessage {
+                message: "Failed to delete document".to_string()
+            });
+
+            Ok(warp::reply::with_status(
+                response,
+                StatusCode::INTERNAL_SERVER_ERROR,
+            ))
+        },
+    }
+}
+
 // /get/users - route to get all users with invite code
 pub async fn get_all_invite_codes(client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /get/users");
@@ -72,7 +122,17 @@ pub async fn update_judge(update: BUpdateJudge, client: Arc<Mutex<Client>>) -> R
     };
 
     let filter = bson::doc! { "_id": id };
-    let update = bson::doc! { "$set": { "name": update.name.unwrap_or("".to_string()), "email": update.email.unwrap_or("".to_string()) }};
+    let update = bson::doc! { "$set": { 
+        "name": update.name.unwrap_or("".to_string()), 
+        "email": update.email.unwrap_or("".to_string()),
+        "options": {
+            "nationality": update.nationality.unwrap_or("".to_string()),
+            "gender": update.gender.unwrap_or("".to_string()),
+            "age": update.age.unwrap_or("".to_string()),
+            "university": update.university.unwrap_or("".to_string()),
+        },
+        "paradigm": update.paradigm.unwrap_or("".to_string())
+    }};
     judges.find_one_and_update(filter, update, None).await.unwrap();
     
     Ok(StatusCode::OK,)
@@ -83,25 +143,32 @@ pub async fn create_judge(new_judge: BCreateJudge, client: Arc<Mutex<Client>>) -
     info!("Received request at /create/judge");
     let client = client.lock().await;
     let judges = (*client).database("judges").collection::<bson::Document>("judges");
-    
+    let new_id = ObjectId::new();
     let new_judge = IJudge {
-        _id: ObjectId::new(),
+        _id: new_id,
         name: new_judge.name,
         email: new_judge.email,
         evaluations: Vec::new(),
         options: IParadigm {
-            nationality: String::new(),
-            gender: String::new(),
-            age: String::new(),
-            university: String::new(),
+            nationality: new_judge.nationality.unwrap_or("".to_string()),
+            gender: new_judge.gender.unwrap_or("".to_string()),
+            age: new_judge.age.unwrap_or("".to_string()),
+            university: new_judge.university.unwrap_or("".to_string())
         },
-        paradigm: String::new(),
+        paradigm: new_judge.paradigm.unwrap_or("".to_string()),
     };
     
     let new_judge_doc = bson::to_bson(&new_judge).unwrap().as_document().unwrap().clone();
     judges.insert_one(new_judge_doc, None).await.unwrap();
     
-    Ok(StatusCode::OK)
+    let response = warp::reply::json(&RNewJudge {
+        new_id: new_id,
+    });
+
+    Ok(warp::reply::with_status(
+        response,
+        StatusCode::OK,
+    ))
 }
 
 // /auth/create - create a new user via checking the invite code
@@ -269,3 +336,20 @@ pub async fn create_invite_code(body: BInviteCode, client: Arc<Mutex<Client>>) -
 
     Ok(warp::reply::json(&code))
 }
+
+// // /auth/token - checks if a token is valid and returns a status code
+// pub async fn check_auth_token(body: BToken, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
+//     info!("Received request at /auth/token");
+//     let client = client.lock().await;
+
+//     // get the secret key from env variables
+
+//     // destructure the token
+
+//     // check if the token is valid - in terms of time
+
+//     // if valid, return ok
+
+//     // if not valid, return not ok - signals frontend to log out / deny access
+
+// }
