@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 export const envSlice = createSlice({
-  name: '_AUTH',
+  name: '_ENV',
   initialState: {
     dev: false,
     backendUrl: "http://localhost:3030"

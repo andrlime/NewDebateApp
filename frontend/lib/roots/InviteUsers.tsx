@@ -5,14 +5,10 @@ import { useSelector } from "react-redux";
 import { RootState } from "../store/reducers/reduce";
 import axios from "axios";
 
-interface IInviteUsers {
-
-}
-
 interface IUser {code: string, email: string, name: string, permission_level: number, _id: Object}
 const EM_RX = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/g;
 
-export const InviteUsers: React.FC<IInviteUsers> = () => {
+export const InviteUsers: React.FC = () => {
     const backendUrl = useSelector((state: RootState) => state.env.backendUrl);
     const [allUsersList, setAllUsersList] = useState<Array<IUser>>([]);
 
@@ -52,7 +48,7 @@ export const InviteUsers: React.FC<IInviteUsers> = () => {
         <div style={{display: "flex", gap: "0.3em", flexDirection: "column"}}>{allUsersList.map((user, index) => (
             <Card shadow="sm" padding="lg" radius="md" withBorder key={`user-${index}`}>
                 <div style={{display: "flex", gap: "0.2em", flexDirection: "column"}}>
-                    <div style={{fontWeight: 800}}>{user.name}</div>
+                    <div style={{fontWeight: 700}}>{user.name}</div>
                     <div>Email: {user.email}</div>
                     <div>Invite Code: {user.code}</div>
                     <div>Permission Level: {user.permission_level}</div>
