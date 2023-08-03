@@ -22,7 +22,7 @@ use crate::models::requests::*;
 pub async fn get_judges(client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /get/judges");
     let client = client.lock().await;
-    let judges_collection = (*client).database("judges").collection::<bson::Document>("judges");
+    let judges_collection = (*client).database("judges").collection::<bson::Document>("judges_v2_2_dev");
 
     let mut cursor = match judges_collection.find(None, None).await {
         Ok(cursor) => cursor,
@@ -73,7 +73,7 @@ pub async fn get_judges(client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, 
 pub async fn delete_judge(request: BDeleteJudge, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /delete/judge");
     let client = client.lock().await;
-    let judges = (*client).database("judges").collection::<IJudge>("judges");
+    let judges = (*client).database("judges").collection::<IJudge>("judges_v2_2_dev");
 
     let id = match ObjectId::from_str(&request.id) {
         Ok(oid) => oid,
@@ -201,7 +201,7 @@ pub async fn get_all_invite_codes(client: Arc<Mutex<Client>>) -> Result<impl war
 pub async fn update_judge(update: BUpdateJudge, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /update/judge");
     let client = client.lock().await;
-    let judges = (*client).database("judges").collection::<bson::Document>("judges");
+    let judges = (*client).database("judges").collection::<bson::Document>("judges_v2_2_dev");
 
     let id = match ObjectId::from_str(&update.id) {
         Ok(oid) => oid,
@@ -229,7 +229,7 @@ pub async fn update_judge(update: BUpdateJudge, client: Arc<Mutex<Client>>) -> R
 pub async fn create_evaluation(update: BCreateEvaluation, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /create/evaluation");
     let client = client.lock().await;
-    let judges = (*client).database("judges").collection::<bson::Document>("judges");
+    let judges = (*client).database("judges").collection::<bson::Document>("judges_v2_2_dev");
 
     let id = match ObjectId::from_str(&update.id.unwrap_or("".to_string())) {
         Ok(oid) => oid,
@@ -273,7 +273,7 @@ pub async fn create_evaluation(update: BCreateEvaluation, client: Arc<Mutex<Clie
 pub async fn delete_evaluation(update: BDeleteEvaluation, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /delete/evaluation");
     let client = client.lock().await;
-    let judges = (*client).database("judges").collection::<bson::Document>("judges");
+    let judges = (*client).database("judges").collection::<bson::Document>("judges_v2_2_dev");
 
     let id = match ObjectId::from_str(&update.id) {
         Ok(oid) => oid,
@@ -298,7 +298,7 @@ pub async fn delete_evaluation(update: BDeleteEvaluation, client: Arc<Mutex<Clie
 pub async fn create_judge(new_judge: BCreateJudge, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /create/judge");
     let client = client.lock().await;
-    let judges = (*client).database("judges").collection::<bson::Document>("judges");
+    let judges = (*client).database("judges").collection::<bson::Document>("judges_v2_2_dev");
     let new_id = ObjectId::new();
     let new_judge = IJudge {
         _id: new_id,
