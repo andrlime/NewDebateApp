@@ -336,7 +336,7 @@ export const GeneratePairings: React.FC = () => {
                 </Paper>}
 
                 <div className={pairStyles.advOptions}>
-                    <Button onClick={() => {
+                    <Button disabled={!file || divName === "FIX MANUALLY" || rdName === "FIX MANUALLY" || !stTime} onClick={() => {
                         setIsLoading(true);
                         exportAsPicture();
                     }} variant="outline" color="red" radius="xl" uppercase loading={isLoading}>

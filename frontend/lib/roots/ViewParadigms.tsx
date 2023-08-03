@@ -47,7 +47,7 @@ export const ViewParadigms: React.FC = () => {
             <div style={{width: "50%", height: "100%", padding: "1rem"}}>
                 {activeJudge && <div>
                     <Title order={4}>{activeJudge?.name}'s Paradigm</Title>
-                    {parse(activeJudge.paradigm)}
+                    {parse(activeJudge.paradigm || "No Paradigm")}
                     </div>}
             </div>
         </div>
