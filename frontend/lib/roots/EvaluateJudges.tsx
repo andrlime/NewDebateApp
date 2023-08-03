@@ -1,4 +1,4 @@
-import { ActionIcon, CloseButton, Flex, Group, NumberInput, Paper, ScrollArea, Table, TextInput, Title } from "@mantine/core";
+import { ActionIcon, CloseButton, Flex, ScrollArea, Table, TextInput, Title } from "@mantine/core";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";

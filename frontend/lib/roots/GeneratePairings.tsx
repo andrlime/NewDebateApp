@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState } from "react";
-import { Button, Center, FileButton, Group, Switch, Table, TextInput } from '@mantine/core';
-import { NumberInput, FileInput, Paper } from '@mantine/core';
+import { Button, Switch, Table, TextInput } from '@mantine/core';
+import { FileInput, Paper } from '@mantine/core';
 import { DIV_DICT, RD_DICT, translate } from "../dictionaries";
 import html2canvas from "html2canvas";
 import pairStyles from './pair.module.css';

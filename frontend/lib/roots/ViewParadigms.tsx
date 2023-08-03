@@ -1,10 +1,6 @@
 import React from "react";
 
-interface IViewParadigms {
-
-}
-
-export const ViewParadigms: React.FC<IViewParadigms> = () => {
+export const ViewParadigms: React.FC = () => {
     return (
         <></>
     );
