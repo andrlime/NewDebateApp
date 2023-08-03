@@ -1,42 +1,40 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState } from "react";
-import { Button, FileButton, Switch, Table, TextInput } from '@mantine/core';
-import { NumberInput } from '@mantine/core';
+import { Button, Switch, Table, TextInput } from '@mantine/core';
+import { FileInput, Paper } from '@mantine/core';
 import { DIV_DICT, RD_DICT, translate } from "../dictionaries";
 import html2canvas from "html2canvas";
 import pairStyles from './pair.module.css';
+import { IconClock, IconPhoto, IconUpload } from '@tabler/icons-react';
+import { TimeInput } from '@mantine/dates';
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../store/reducers/reduce";
+import { setTName } from "../store/slices/tourn";
 
-interface RoundTableProps {
+interface IEntireRound {
+    tournamentName: string;
     divName: string;
     rdName: string;
     startTime: number;
-    rounds: Array<Round>;
+    rounds: Array<ISingleRound>;
     override: boolean;
     overriddenRoom: string;
     showOffline: boolean;
     logo: string | null
 }
 
-interface Round {
+interface ISingleRound {
     flight: string;
     teamA: string;
     teamB: string;
     judges: Array<{name: string, id: string}>;
     offlineRoom: string;
+    override?: boolean;
+    overriddenRoom?: string;
+    showOfflineRoom?: boolean
 }
 
-interface RoundProps {
-    flight: string;
-    teamA: string;
-    teamB: string;
-    judges: Array<{name: string, id: string}>;
-    override: boolean;
-    overriddenRoom: string;
-    offlineRoom: string;
-    showOfflineRoom: boolean
-}
-
-const RoundTableRow: React.FC<RoundProps> = ({flight, teamA, teamB, judges, overriddenRoom, override, offlineRoom, showOfflineRoom}) => {
+const RoundTableRow: React.FC<ISingleRound> = ({flight, teamA, teamB, judges, overriddenRoom, override, offlineRoom, showOfflineRoom}) => {
     const [activeJudge, setActiveJudge] = useState<{name: string, id: string}>(judges[0] || {name: "BYE", id: ""});
 
     return (
@@ -65,7 +63,7 @@ const RoundTableRow: React.FC<RoundProps> = ({flight, teamA, teamB, judges, over
     );
 }
 
-const SingleFlight: React.FC<{startTime: number, rounds: Array<Round>, flightNumber: number, override: boolean, overriddenRoom: string, showOffline: boolean}> = ({startTime, rounds, flightNumber, override, overriddenRoom, showOffline}) => {
+const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleRound>, flightNumber: number, override: boolean, overriddenRoom: string, showOffline: boolean}> = ({startTime, rounds, flightNumber, override, overriddenRoom, showOffline}) => {
     let bgc = flightNumber === 1 ? "#003A77" : "#4A1231";
     let filteredRounds = rounds.filter((a) => a.flight == `${flightNumber}`);
     
@@ -104,10 +102,8 @@ const SingleFlight: React.FC<{startTime: number, rounds: Array<Round>, flightNum
         <div style={{display: "flex", flexDirection: "column", justifyContent: "center", width: "100%"}}>
             <div style={{fontWeight: "600", fontSize: "1.2rem", color: "black", width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center"}}>
                 <div>Flight {flightNumber===1 ? "A" : "B"}</div>
-                <div style={{textAlign: "right", whiteSpace: "pre", display: "flex", flexDirection: "row", gap: "0.1em"}}>
-                    <span>{(startTime).toString().padStart(4, "0").substring(0,2)}</span>
-                    <span>&#58;</span>
-                    <span>{(startTime).toString().padStart(4, "0").substring(2)}</span>
+                <div style={{textAlign: "right", whiteSpace: "pre"}}>
+                    <span>{startTime}</span>
                 </div>
             </div>
             <Table style={{marginTop: "0.1rem", marginBottom: "1rem", textAlign: "left", fontSize: "1.125rem", fontWeight: "bold", border: "1px solid black"}}>
@@ -126,17 +122,45 @@ const SingleFlight: React.FC<{startTime: number, rounds: Array<Round>, flightNum
     )
 }
 
-const RoundTable: React.FC<RoundTableProps> = ({divName, rdName, startTime, rounds, override, overriddenRoom, showOffline, logo}) => {
+const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, startTime, rounds, showOffline, logo}) => {
+    const name = useSelector((state: RootState) => state.auth.name);
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+          setCurrentTime(new Date());
+        }, 1000);
+    
+        // The return function is a clean-up function that React calls when the component unmounts.
+        return () => {
+          clearInterval(timer);
+        };
+    }, []);
+
+    const format = (date: Date) => {
+        const addZero = (n: number) => n < 10 ? '0' + n : n;
+        const month = addZero(date.getMonth() + 1);  // getMonth() is zero-based
+        const day = addZero(date.getDate());
+        const hours = addZero(date.getHours());
+        const minutes = addZero(date.getMinutes());
+        const seconds = addZero(date.getSeconds());
+        
+        return `${month}/${day} @ ${hours}:${minutes}:${seconds}`;
+    }
+      
+
     return (
         <div style={{color: "#003A77", width: "75%", minWidth: "1000px", display: "flex", flexDirection: "column", textAlign: "center", padding: "1.25rem", whiteSpace: "nowrap"}} id="CONTAINER_TO_EXPORT">
             <div style={{fontFamily: `Georgia, "Times New Roman", Times, serif`, fontWeight: "bold", fontSize: "3rem"}}>{divName}</div>
             <div style={{fontFamily: `Georgia, "Times New Roman", Times, serif`, fontWeight: "bold", fontSize: "2rem"}}>{rdName}</div>
 
-            <SingleFlight startTime={startTime} flightNumber={1} rounds={rounds} override={override} overriddenRoom={overriddenRoom} showOffline={showOffline}/>
-            {rounds.filter(a => a.flight === "2").length > 0 ? <SingleFlight startTime={startTime + 100} flightNumber={2} rounds={rounds} override={override} overriddenRoom={overriddenRoom} showOffline={showOffline}/> : ""}
+            <SingleFlight startTime={startTime} flightNumber={1} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/>
+            {rounds.filter(a => a.flight === "2").length > 0 ? <SingleFlight startTime={`${(parseInt(startTime.toString().substring(0,9)) + 1).toString().padStart(2, "0")}${startTime.toString().substring(2)}`} flightNumber={2} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/> : ""}
 
-            <div style={{display: "flex", width: "100%", padding: "1rem"}}>
-                <img style={{width: "30%"}} alt={"Logo"} src={logo ? logo : "/logo.png"}/>
+            <div style={{display: "flex", flexDirection: "column", width: "100%", padding: "1rem", textAlign: "left"}}>
+                <img style={{width: "35%"}} alt={"Logo"} src={logo ? logo : "/logo.png"}/>
+                <div style={{fontWeight: 500, fontSize: "0.5rem"}}>{tournamentName} - {divName} - {rdName}</div>
+                <div style={{fontWeight: 300, fontSize: "0.5rem"}}>Generated by {name} at {format(currentTime)}</div>
             </div>
         </div>
     );
@@ -144,17 +168,23 @@ const RoundTable: React.FC<RoundTableProps> = ({divName, rdName, startTime, roun
 
 export const GeneratePairings: React.FC = () => {
     const [file, setFile] = useState<File | null>(null);
-    const [content, setContent] = useState("");
+    const [fileContent, setContent] = useState("");
+    const [fileError, _] = useState("");
 
-    const [divName, setDivName] = useState("");
-    const [rdName, setRdName] = useState("");
+    const [image, setImage] = useState<string | null>(null);
+
+    const [divName, setDivName] = useState("FIX MANUALLY");
+    const [rdName, setRdName] = useState("FIX MANUALLY");
     const [stTime, setStTime] = useState<number | null>();
-    const [rounds, setRounds] = useState<Array<Round>>([]);
+    const [rounds, setRounds] = useState<Array<ISingleRound>>([]);
+    
+    const [sao, setSao] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isOffline, setIsOffline] = useState(true);
 
-    const [override, setOverride] = useState(false);
-    const [overriddenId, setOverriddenId] = useState("");
-
-    const [offline, setOffline] = useState(false); // set to false after shanghai
+    // some redux
+    const dispatch = useDispatch();
+    const tournamentName = useSelector((state: RootState) => state.tourn.tournamentName);
 
     const exportAsPicture = () => {
         let data = document.getElementById('CONTAINER_TO_EXPORT')!
@@ -163,6 +193,8 @@ export const GeneratePairings: React.FC = () => {
             let fileName = `${divName}-${rdName}.png`;
             saveAs(image, fileName)
         })
+
+        setIsLoading(false);
     }
 
     const saveAs = (blob: any, fileName: string) =>{
@@ -190,10 +222,10 @@ export const GeneratePairings: React.FC = () => {
             setContent(res);
         })
     }, [file]);
-
+    
     useEffect(() => {
-        let LINES = content.split('\n');
-        if(LINES.length < 1) return;
+        let LINES = fileContent.split("\n");
+        if(LINES.length < 2) return;
 
         const METADATA = LINES[0];
 
@@ -204,29 +236,13 @@ export const GeneratePairings: React.FC = () => {
         setDivName(D_NAME);
         setRdName(R_NAME);
 
-        if(R_NAME === "Round 1") {
-            setStTime(830);
-        }
-
-        if(R_NAME === "Round 2") {
-            setStTime(1100);
-        }
-
-        if(R_NAME === "Round 3") {
-            setStTime(1345);
-        }
-
-        if(R_NAME === "Round 4") {
-            setStTime(1615);
-        }
-
         // now we parse rounds
         LINES = LINES.splice(1);
-        const allRounds: Array<Round> = [];
+        const allRounds: Array<ISingleRound> = [];
         for(const L of LINES) {
             let data = (L.substring(1, L.length-1)).split(",");
 
-            let currentRound: Round = {flight: "", teamA: "", teamB: "", judges: [], offlineRoom: ""};
+            let currentRound: ISingleRound = {flight: "", teamA: "", teamB: "", judges: [], offlineRoom: ""};
             let twoTeams = L.match(/\d{6,9}/g) || ["NO"];
             if(twoTeams[0] == "NO") continue;
 
@@ -282,9 +298,7 @@ export const GeneratePairings: React.FC = () => {
         }
 
         setRounds(allRounds);
-    }, [content]);
-
-    const [image, setImage] = useState<string | null>(null);
+    }, [fileContent]);
 
     const changeImage = (e: any) => {
         let reader = new FileReader();
@@ -301,56 +315,38 @@ export const GeneratePairings: React.FC = () => {
         }
     }
 
-    return (
-        <div style={{padding: "0.75rem"}}>
-            {/* Settings */}
-            <div style={{padding: "0.75rem", paddingTop: "0.125rem", paddingBottom: "0.125rem", display: "flex", flexDirection: "column"}}>
-                <span style={{fontWeight: "bold"}}>Upload the horizontal schematic for this round here</span>
-                <div style={{display: "flex", flexDirection: "row", width: "fit-content", alignItems: "center"}}>
-                    <FileButton onChange={setFile} accept={".csv"}>
-                        {(props) => <>Pairings CSV: <Button style={{width: "fit-content", margin: "0.25rem", marginLeft: "1rem"}} color={"grape"} variant={"outline"} {...props}>Upload File</Button></>}
-                    </FileButton>
-                </div>
-            </div>
-            <div style={{padding: "0.75rem", paddingTop: "0.125rem", paddingBottom: "0.125rem", display: "flex", flexDirection: "column"}}>
-                <span style={{fontWeight: "bold"}}>Make manual adjustments</span>
-                <div style={{display: "flex", flexDirection: "row"}}>
-                    <TextInput value={divName} description={divName} onChange={(event) => setDivName(event.currentTarget.value)} style={{margin: "0.25rem", marginLeft: "0"}} label={"Division Name"} placeholder={"Division Name"} error={!divName || divName === "MANUALLY CHANGE" ? "Please enter the division name" : ""}/>
-                    <TextInput value={rdName} description={rdName} onChange={(event) => setRdName(event.currentTarget.value)} style={{margin: "0.25rem"}} label={"Round Name"} placeholder={"Round Name"} error={!rdName || rdName === "MANUALLY CHANGE" ? "Please enter the round name" : ""}/>
-                    <NumberInput value={stTime || ""} max={2359} description={(stTime || "").toString().padStart(4, "0").substring(0,2) + ":" + (stTime || "").toString().padStart(4, "0").substring(2)} error={!stTime ? "Please enter the round start time" : ""} onChange={(event) => {
-                        if(!event) setStTime(0);
-                        if(parseInt(event + "") < 2400 && parseInt(event + "") > 0) setStTime(event || 0);
-                    }} style={{margin: "0.25rem"}} label={"Start Time"} placeholder={"Start Time"} hideControls/>
-                </div>
-            </div>
-            <div style={{padding: "0.75rem", paddingTop: "0.125rem", paddingBottom: "0.125rem", display: "flex", flexDirection: "column"}}>
-                <div style={{display: "flex", flexDirection: "column"}}>
-                    <Switch checked={override} onChange={(e) => setOverride(e.currentTarget.checked)} label={'Override room ID?'} description={"Toggle to force change all meeting IDs for final rounds"}/>
-                    {override ? <TextInput style={{width: "fit-content"}} value={overriddenId} onChange={(e) => setOverriddenId(e.currentTarget.value)} placeholder={"Overridden Room ID"}/> : ""}
-                    <Switch checked={offline} onChange={(e) => setOffline(e.currentTarget.checked)} label={'Show offline room?'} description={"Toggle to use offline room names instead of online room IDs"}/>
-                </div>
-            </div>
-            <div style={{padding: "0.75rem", paddingTop: "0.125rem", paddingBottom: "0.125rem", display: "flex", flexDirection: "column"}}>
-                <span style={{fontWeight: "bold", color: "rgb(239 68 68)"}}>If you need to adjust a round&#39;s chair, please click that judge&#39;s name.</span>
-            </div>
-            <div style={{padding: "0.75rem", paddingTop: "0.125rem", paddingBottom: "0.125rem", display: "flex", flexDirection: "column"}}>
-                <span style={{fontWeight: "bold"}}>Upload your logo if you have one</span>
-                <div style={{display: "flex", flexDirection: "row", width: "fit-content", alignItems: "center"}}>
-                    <FileButton onChange={changeImage} accept={"image/*"}>
-                        {(props) => <>Logo: <Button style={{width: "fit-content", margin: "0.25rem", marginLeft: "1rem"}} color={"orange"} variant={"outline"} {...props}>Upload Image</Button></>}
-                    </FileButton>
-                </div>
-            </div>
-            <div style={{padding: "0.75rem", paddingTop: "0.125rem", paddingBottom: "0.125rem", display: "flex", flexDirection: "column"}}>
-                <span style={{fontWeight: "bold"}}>Export as image</span>
-                <div style={{display: "flex", flexDirection: "column"}}>
-                    <Button onClick={exportAsPicture} style={{width: "fit-content", margin: "0.25rem", marginLeft: "0"}} color={"orange"} variant={"outline"} disabled={!divName || divName === "MANUALLY CHANGE" || !rdName || rdName === "MANUALLY CHANGE" || !stTime}>Export</Button>
-                    <span style={{color: "rgb(239 68 68)"}}>{!divName || divName === "MANUALLY CHANGE" || !rdName || rdName === "MANUALLY CHANGE" || !stTime ? "Please fix errors" : ""}</span>
-                </div>
-            </div>
 
-            {/* Show the table */}
-            {content === "" ? "" : <RoundTable logo={image} divName={divName} rdName={rdName} startTime={stTime || 0} rounds={rounds} override={override} overriddenRoom={overriddenId} showOffline={offline}/>}
+    return (
+        <div>
+            <Paper shadow="lg" p="lg" radius="lg" withBorder>
+                
+                <FileInput error={fileError} required onChange={setFile} accept=".csv" label="Horizontal Schematic" placeholder="round schematic" icon={<IconUpload size={"1rem"} />} />
+                <TextInput value={tournamentName} onChange={(e) => dispatch(setTName(e.target.value))} required label="Tournament Name" placeholder="national tournament" />
+                <TextInput value={divName} onChange={(e) => setDivName(e.target.value)} required label="Division Name" placeholder="open division" />
+                <TextInput value={rdName} onChange={(e) => setRdName(e.target.value)} required label="Round Name" placeholder="round x" />
+                <TimeInput value={stTime || ""} onChange={(e) => setStTime(e.target.value as unknown as number)} required label="Round Start Time" icon={<IconClock size="1rem" stroke={1.5} />} />
+                
+                <div className={pairStyles.advOptions} onClick={() => setSao(!sao)}>{sao ? "Hide" : "Show"} Advanced Options</div>
+                {sao && <Paper withBorder p={"xs"}>
+                    <div className={pairStyles.advOptionsFlex}>
+                        <FileInput onChange={changeImage} accept="image/*" label="Custom Logo" placeholder="custom logo" icon={<IconPhoto size={"1rem"} />} />
+                        <Switch checked={isOffline} onChange={(e) => setIsOffline(e.target.checked)} label={'Online mode?'} description={"Use online room IDs"}/>
+                        <Switch disabled checked label={'Force room change?'} description={"Force change all rounds to another room"}/>
+                    </div>
+                </Paper>}
+
+                <div className={pairStyles.advOptions}>
+                    <Button onClick={() => {
+                        setIsLoading(true);
+                        exportAsPicture();
+                    }} variant="outline" color="red" radius="xl" uppercase loading={isLoading}>
+                        Export
+                    </Button>
+                </div>
+
+            </Paper>
+
+            {fileContent === "" ? "" : <RoundTable tournamentName={tournamentName} logo={image} divName={divName} rdName={rdName} startTime={stTime || 0} rounds={rounds} showOffline={!isOffline} override={false} overriddenRoom=""/>}
         </div>
     );
 };

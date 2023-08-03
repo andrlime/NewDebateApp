@@ -1,18 +1,44 @@
-import { Button, Card, NumberInput, Paper, TextInput, useMantineTheme } from "@mantine/core";
+import { ActionIcon, Button, Card, NumberInput, Paper, Table, TextInput, useMantineTheme } from "@mantine/core";
 import React, { useEffect, useState } from "react";
 import InboxView from "../components/InboxView";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/reducers/reduce";
 import axios from "axios";
 
-interface IInviteUsers {
+import judgeStyles from './judge.module.css';
+import { IconTrash } from "@tabler/icons-react";
 
+const DeleteIcon: React.FC<{id: string, delCallback: Function}> = ({id, delCallback}) => {
+    const backendUrl = useSelector((state: RootState) => state.env.backendUrl);
+    const [conf, setConf] = useState(false);
+    const [load, setLoad] = useState(false);
+    return (
+        <ActionIcon loading={load} color="red" variant={conf ? "filled" : "light"} onClick={() => {
+            if(!conf) {
+                setConf(true);
+            } else {
+                setLoad(true);
+                setConf(false);
+                // delete
+                axios.post(`${backendUrl}/delete/user`, {email: id}).then((_) => {
+                    setLoad(false);
+                    delCallback(id);
+                }).catch(err => {
+                    // doesn't really matter
+                    setLoad(false);
+                    console.error(err);
+                })
+            }
+        }}>
+            <IconTrash size="1rem" />
+        </ActionIcon>
+    )
 }
 
 interface IUser {code: string, email: string, name: string, permission_level: number, _id: Object}
 const EM_RX = /(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))/g;
 
-export const InviteUsers: React.FC<IInviteUsers> = () => {
+export const InviteUsers: React.FC = () => {
     const backendUrl = useSelector((state: RootState) => state.env.backendUrl);
     const [allUsersList, setAllUsersList] = useState<Array<IUser>>([]);
 
@@ -49,16 +75,39 @@ export const InviteUsers: React.FC<IInviteUsers> = () => {
     }
 
     const leftComponent = (
-        <div style={{display: "flex", gap: "0.3em", flexDirection: "column"}}>{allUsersList.map((user, index) => (
-            <Card shadow="sm" padding="lg" radius="md" withBorder key={`user-${index}`}>
-                <div style={{display: "flex", gap: "0.2em", flexDirection: "column"}}>
-                    <div style={{fontWeight: 800}}>{user.name}</div>
-                    <div>Email: {user.email}</div>
-                    <div>Invite Code: {user.code}</div>
-                    <div>Permission Level: {user.permission_level}</div>
-                </div>
-            </Card>
-        ))}</div>
+        <div>
+            <Table striped highlightOnHover withBorder withColumnBorders>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Invite Code</th>
+                        <th>Permission Level</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {allUsersList && allUsersList.map((user, index) => (
+                        <tr className={judgeStyles.row} key={`user-db-${index}`}>
+                            <td>{user.name}</td>
+                            <td>{user.email}</td>
+                            <td>{user.code}</td>
+                            <td>{user.permission_level}</td>
+                            <td>
+                                <DeleteIcon id={user.email} delCallback={(id: string) => {
+                                    setAllUsersList(allUsersList.filter(elem => elem.email !== user.email));
+                                }} />
+                            </td>
+                        </tr>
+                    )) || <tr>
+                            <td>Loading</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>}
+                </tbody>
+            </Table>
+        </div>
     );
 
     const [emailInputBox, setEmailInputBox] = useState("");
@@ -107,6 +156,7 @@ export const InviteUsers: React.FC<IInviteUsers> = () => {
     
     return (
         <InboxView
+            dist={60}
             leftComponent={leftComponent}
             rightComponent={rightComponent}
         />

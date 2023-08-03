@@ -1,6 +1,7 @@
 import { combineReducers, configureStore, createStore } from '@reduxjs/toolkit'
 import authReducer from '../slices/auth'
 import envReducer from '../slices/env'
+import tournReducer from '../slices/tourn'
 import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage'; // defaults to localStorage for web
 
@@ -9,7 +10,7 @@ const persistConfig = {
   storage,
 };
 
-const rootReducer = combineReducers({ auth: authReducer, env: envReducer });
+const rootReducer = combineReducers({ auth: authReducer, env: envReducer, tourn: tournReducer });
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({

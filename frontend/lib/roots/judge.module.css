@@ -1,0 +1,16 @@
+.row:hover {
+    cursor: pointer;
+}
+
+.label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #212529;
+    word-break: break-word;
+    cursor: default;
+    -webkit-tap-highlight-color: transparent;
+    line-height: 1.55;
+    margin-top: 0.1rem;
+    margin-bottom: 0.1rem;
+}

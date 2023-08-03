@@ -1,5 +1,5 @@
 import { Box, rem, Group, useMantineTheme, Text, Button } from "@mantine/core";
-import React, { useEffect } from "react";
+import React from "react";
 
 // redux
 import { useSelector, useDispatch } from 'react-redux'

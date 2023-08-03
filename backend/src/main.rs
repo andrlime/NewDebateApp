@@ -7,7 +7,7 @@ use std::error::Error;
 use tokio;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use routes::{get_judges, update_judge, create_judge, create_user, validate_user, create_invite_code, get_all_invite_codes};
+use routes::{get_judges, update_judge, create_judge, create_user, validate_user, create_invite_code, get_all_invite_codes, delete_judge, delete_user, create_evaluation, delete_evaluation};
 use log::info;
 use log::error;
 use std::env;
@@ -51,6 +51,24 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .and(client_filter.clone())
         .and_then(get_all_invite_codes);
 
+    info!("Creating route at /delete/judge");
+
+    let delete_judge_route = warp::path("delete")
+        .and(warp::path("judge"))
+        .and(warp::path::end())
+        .and(warp::body::json())
+        .and(client_filter.clone())
+        .and_then(delete_judge);
+
+    info!("Creating route at /delete/user");
+
+    let delete_user_route = warp::path("delete")
+        .and(warp::path("user"))
+        .and(warp::path::end())
+        .and(warp::body::json())
+        .and(client_filter.clone())
+        .and_then(delete_user);
+
     info!("Creating route at /update/judge");
 
     let update_judge_route = warp::path("update")
@@ -68,6 +86,24 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .and(warp::body::json())
         .and(client_filter.clone())
         .and_then(create_judge);
+        
+    info!("Creating route at /create/evaluation");
+
+    let create_evaluation_route = warp::path("create")
+        .and(warp::path("evaluation"))
+        .and(warp::path::end())
+        .and(warp::body::json())
+        .and(client_filter.clone())
+        .and_then(create_evaluation);
+
+    info!("Creating route at /delete/evaluation");
+
+    let delete_evaluation_route = warp::path("delete")
+        .and(warp::path("evaluation"))
+        .and(warp::path::end())
+        .and(warp::body::json())
+        .and(client_filter.clone())
+        .and_then(delete_evaluation);
 
     info!("Creating route at /auth/create");
 
@@ -114,6 +150,10 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .or(create_user_route)
         .or(validate_user_route)
         .or(get_users_route)
+        .or(delete_judge_route)
+        .or(delete_user_route)
+        .or(create_evaluation_route)
+        .or(delete_evaluation_route)
         .or(empty_route)
         .with(cors);
 
