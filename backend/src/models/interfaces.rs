@@ -18,6 +18,9 @@ pub struct IEvaluation {
     #[serde(rename = "isImprovement")]
     pub is_improvement: bool,
     
+    #[serde(rename = "divisionName")]
+    pub div_name: String,
+    
     pub decision: f32,
     pub comparison: f32,
     pub citation: f32,
@@ -41,7 +44,7 @@ pub struct IJudge {
     pub name: String,
     pub email: String,
     pub evaluations: Vec<IEvaluation>,
-    pub paradigm: String,
+    pub paradigm: Option<String>,
     pub options: IParadigm
 }
 

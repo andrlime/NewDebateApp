@@ -1,6 +1,6 @@
 //models/requests.rs
 use serde::{Deserialize, Serialize};
-use crate::models::interfaces::IFrontendUser;
+use crate::models::interfaces::{IFrontendUser};
 use bson::oid::ObjectId;
 
 // request body content
@@ -45,6 +45,30 @@ pub struct BCreateUser {
     pub email: String,
     pub password: String,
     pub code: String,  // Invite code
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct BCreateEvaluation {
+    pub id: Option<String>,
+    pub tournament_name: Option<String>,
+    pub round_name: Option<String>,
+    pub is_prelim: Option<bool>,
+    pub is_improvement: Option<bool>,
+    pub div_name: Option<String>,
+    pub decision: Option<i32>,
+    pub comparison: Option<i32>,
+    pub citation: Option<i32>,
+    pub coverage: Option<i32>,
+    pub bias: Option<i32>,
+    pub weight: Option<i32>,
+    pub date: Option<i64>,
+}
+
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct BDeleteEvaluation {
+    pub id: String,
+    pub timestamp: i64,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

@@ -10,12 +10,12 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 
-import { Button, Table, TextInput } from "@mantine/core";
+import { Button, FileButton, Table, TextInput, Title } from "@mantine/core";
 import { ActionIcon } from '@mantine/core';
 import { RichTextEditor, Link } from '@mantine/tiptap';
 import { useEditor } from '@tiptap/react';
 import { HardBreak } from '@tiptap/extension-hard-break';
-import { IconDeviceFloppy, IconEPassport, IconGenderAgender, IconMail, IconPlus, IconSchool, IconTextCaption, IconTrash } from "@tabler/icons-react";
+import { IconDeviceFloppy, IconDownload, IconEPassport, IconGenderAgender, IconMail, IconPlus, IconSchool, IconTextCaption, IconTrash, IconUpload } from "@tabler/icons-react";
 
 import judgeStyles from "./judge.module.css";
 
@@ -64,15 +64,119 @@ export const JudgeDatabase: React.FC = () => {
             })
     }, [backendUrl]);
 
+    const [file, setFile] = useState<File | null>();
+    const [fileContent, setFileContent] = useState("");
+    const [fileLoading, setFileLoading] = useState(false);
+
+    useEffect(() => {
+        if(!file) return;
+        setFileLoading(true);
+        file.text().then((res) => {
+            setFileContent(res);
+        })
+    }, [file]);
+    
+    useEffect(() => {
+        let LINES = fileContent.split("\n");
+        if(LINES.length < 2) return;
+        // if(LINES[0] !== "name,email,nationality,gender,institution") {
+        //     console.error("Invalid file");
+        //     setFileLoading(false);
+        //     return;
+        // }
+
+        LINES = LINES.splice(1);
+        setFileLoading(true);
+        
+        for(let LINE of LINES) {
+            const data = LINE.split(",");
+            const name = data[0];
+            const email = data[1];
+            const nat = data[2];
+            const gndr = data[3];
+            const inst = data[4];
+            const pdm = "";
+
+            const req = {
+                name: name,
+                email: email,
+                nationality: nat,
+                gender: gndr,
+                age: "",
+                university: inst,
+                paradigm: pdm,
+            };
+            
+            axios.post(`${backendUrl}/create/judge`, req).then(res => {
+                console.log(res);
+                setJudgeList([...judgeList!, {
+                    _id: res.data.new_id,
+                    name: name,
+                    email: email,
+                    options: {
+                        nationality: nat,
+                        gender: gndr,
+                        age: "",
+                        university: inst,
+                    },
+                    paradigm: pdm,
+                    evaluations: []
+                }]);
+            }).catch(err => {
+                console.error(err);
+            });
+        }
+
+        setFileLoading(false);
+    }, [fileContent]);
+
+    const downloadSample = () => {
+        let data = "name,email,nationality,gender,institution\n";
+        data = 'data:text/csv;charset=utf-8,' + encodeURI(data);
+        let fileName = `judge_template.csv`;
+        saveAs(data, fileName)
+    }
+
+    const saveAs = (blob: any, fileName: string) =>{
+        let elem = window.document.createElement('a');
+        elem.href = blob
+        elem.download = fileName;
+        (document.body || document.documentElement).appendChild(elem);
+        if (typeof elem.click === 'function') {
+          elem.click();
+        } else {
+          elem.target = '_blank';
+          elem.dispatchEvent(new MouseEvent('click', {
+            view: window,
+            bubbles: true,
+            cancelable: true
+          }));
+        }
+        URL.revokeObjectURL(elem.href);
+        elem.remove()
+    }
+
     const leftComponent = (
         <div>
             <div className={judgeStyles.label} style={{float: "right"}}>
+                <Button onClick={() => {
+                    downloadSample();
+                }} variant="outline" color="yellow" radius="xl" uppercase rightIcon={<IconDownload size="1rem" />} mx="sm">
+                    Template
+                </Button>
+
+                <FileButton onChange={setFile} accept="image/csv">
+                    {(props) => <Button loading={fileLoading} variant="outline" color="orange" radius="xl" uppercase rightIcon={<IconUpload size="1rem" />} mx="sm" {...props}>
+                        Import
+                    </Button>}
+                </FileButton>
+
                 <Button onClick={() => {
                     setCreateMode(true);
                     setActiveJudge(null);
                     setActiveJudgeC(null);
                     editor?.commands.setContent("");
-                }} variant="outline" color="red" radius="xl" uppercase rightIcon={<IconPlus size="1rem" />}>
+                }} variant="outline" color="red" radius="xl" uppercase rightIcon={<IconPlus size="1rem" />} mx="sm">
                     Create
                 </Button>
             </div>
@@ -145,6 +249,7 @@ export const JudgeDatabase: React.FC = () => {
 
     const rightComponent = (
         <div style={{background: "white", position: "sticky", top: "9em", zIndex: 1000}}>{(activeJudge || createMode) && (<div>
+            <Title order={4}>{createMode ? "Create New " : ""}Judge {activeJudge?.name || ""}</Title>
             <TextInput onChange={(e) => {
                 if(!createMode) {
                     let copy = {...activeJudge!};
@@ -274,7 +379,6 @@ export const JudgeDatabase: React.FC = () => {
     
                         axios.post(`${backendUrl}/create/judge`, req).then(res => {
                             setSetLoading(false);
-                            console.log(res);
 
                             if(judgeList) {
                                 setJudgeList([...judgeList, {

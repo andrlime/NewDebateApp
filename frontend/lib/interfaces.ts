@@ -21,7 +21,8 @@ export interface IEvaluation {
     coverage: number;
     bias: number;
     weight: number;
-    date: Date | string;
+    date: Object;
+    divisionName: string;
 }
 
 export interface IParadigm {

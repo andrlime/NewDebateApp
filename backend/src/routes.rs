@@ -22,21 +22,51 @@ use crate::models::requests::*;
 pub async fn get_judges(client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /get/judges");
     let client = client.lock().await;
-    let judges = (*client).database("judges").collection("judges");
+    let judges_collection = (*client).database("judges").collection::<bson::Document>("judges");
 
-    let cursor = judges.find(None, None).await.unwrap();
-    let result: Vec<IJudge> = cursor.filter_map(|doc| async {
-        match doc {
-            Ok(document) => {
-                let judge: Option<IJudge> = bson::from_bson(bson::Bson::Document(document)).ok();
-                judge
-            }
-            _ => None,
+    let mut cursor = match judges_collection.find(None, None).await {
+        Ok(cursor) => cursor,
+        Err(e) => {
+            error!("{}", e);
+            let response = warp::reply::json(&RMessage {
+                message: "Could not get all judges".to_string(),
+            });
+            return Ok(warp::reply::with_status(
+                response,
+                StatusCode::INTERNAL_SERVER_ERROR,
+            ));
         }
-    })
-    .collect().await;
+    };
 
-    Ok(warp::reply::json(&result))
+    let mut judges: Vec<IJudge> = Vec::new();
+
+    while let Some(result) = cursor.next().await {
+        match result {
+            Ok(document) => {
+                match bson::from_bson::<IJudge>(bson::Bson::Document(document)) {
+                    Ok(judge) => judges.push(judge),
+                    Err(_) => {
+                        error!("Could not deserialize judge");
+                    },
+                }
+            }
+            Err(e) => {
+                error!("{}", e);
+                let response = warp::reply::json(&RMessage {
+                    message: "Could not get all judges".to_string()
+                });
+                return Ok(warp::reply::with_status(
+                    response,
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                ));
+            }
+        };
+    }
+
+    Ok(warp::reply::with_status(
+        warp::reply::json(&judges),
+        StatusCode::OK,
+    ))
 }
 
 // /delete/judge - route to delete a judge
@@ -195,6 +225,75 @@ pub async fn update_judge(update: BUpdateJudge, client: Arc<Mutex<Client>>) -> R
     Ok(StatusCode::OK,)
 }
 
+// /create/evaluation - route to update judge metadata
+pub async fn create_evaluation(update: BCreateEvaluation, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
+    info!("Received request at /create/evaluation");
+    let client = client.lock().await;
+    let judges = (*client).database("judges").collection::<bson::Document>("judges");
+
+    let id = match ObjectId::from_str(&update.id.unwrap_or("".to_string())) {
+        Ok(oid) => oid,
+        Err(e) => panic!("Error converting string to ObjectId: {}", e),
+    };
+
+    let filter = bson::doc! { "_id": id };
+    
+    let evaluation = bson::doc! {
+        "tournament_name": update.tournament_name,
+        "round_name": update.round_name,
+        "is_prelim": false,
+        "is_improvement": update.is_improvement,
+        "div_name": update.div_name,
+        "decision": update.decision,
+        "comparison": update.comparison,
+        "citation": update.citation,
+        "coverage": update.coverage,
+        "bias": update.bias,
+        "weight": update.weight,
+        "date": bson::DateTime::from_millis(update.date.unwrap_or(0).into())
+    };
+
+    let update = bson::doc! { "$push": { 
+        "evaluations": evaluation
+    }};
+
+    judges.find_one_and_update(filter, update, None).await.unwrap();
+    
+    let response = warp::reply::json(&RMessage {
+        message: "Okay".to_string()
+    });
+
+    Ok(warp::reply::with_status(
+        response,
+        StatusCode::OK,
+    ))
+}
+
+// /delete/evaluation - delete an eval
+pub async fn delete_evaluation(update: BDeleteEvaluation, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
+    info!("Received request at /delete/evaluation");
+    let client = client.lock().await;
+    let judges = (*client).database("judges").collection::<bson::Document>("judges");
+
+    let id = match ObjectId::from_str(&update.id) {
+        Ok(oid) => oid,
+        Err(e) => panic!("Error converting string to ObjectId: {}", e),
+    };
+
+    // Convert the timestamp in milliseconds to a Date
+    let bson_datetime = bson::DateTime::from_millis(update.timestamp.into());
+    let delete_evaluation = bson::doc! { "date": bson_datetime };
+
+    let filter = bson::doc! { "_id": id };
+    let update = bson::doc! { "$pull": { 
+        "evaluations": delete_evaluation
+    }};
+
+    judges.find_one_and_update(filter, update, None).await.unwrap();
+    
+    Ok(StatusCode::OK,)
+}
+
 // /create/judge - route to create a new judge
 pub async fn create_judge(new_judge: BCreateJudge, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
     info!("Received request at /create/judge");
@@ -212,7 +311,7 @@ pub async fn create_judge(new_judge: BCreateJudge, client: Arc<Mutex<Client>>) -
             age: new_judge.age.unwrap_or("".to_string()),
             university: new_judge.university.unwrap_or("".to_string())
         },
-        paradigm: new_judge.paradigm.unwrap_or("".to_string()),
+        paradigm: Some(new_judge.paradigm.unwrap_or("".to_string())),
     };
     
     let new_judge_doc = bson::to_bson(&new_judge).unwrap().as_document().unwrap().clone();
@@ -410,3 +509,18 @@ pub async fn create_invite_code(body: BInviteCode, client: Arc<Mutex<Client>>) -
 //     // if not valid, return not ok - signals frontend to log out / deny access
 
 // }
+
+
+// manip evaluations
+/*
+#[derive(Debug, Deserialize, Serialize)]
+pub struct BCreateEvaluation {
+    pub eval: IEvaluation,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct BDeleteEvaluation {
+    pub timestamp: String,
+}
+
+*/

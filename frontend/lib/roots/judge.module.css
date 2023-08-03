@@ -1,7 +1,5 @@
-.judgeTableBody {
-    .row:hover {
-        cursor: pointer;
-    }
+.row:hover {
+    cursor: pointer;
 }
 
 .label {

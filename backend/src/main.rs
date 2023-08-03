@@ -7,7 +7,7 @@ use std::error::Error;
 use tokio;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use routes::{get_judges, update_judge, create_judge, create_user, validate_user, create_invite_code, get_all_invite_codes, delete_judge, delete_user};
+use routes::{get_judges, update_judge, create_judge, create_user, validate_user, create_invite_code, get_all_invite_codes, delete_judge, delete_user, create_evaluation, delete_evaluation};
 use log::info;
 use log::error;
 use std::env;
@@ -86,6 +86,24 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .and(warp::body::json())
         .and(client_filter.clone())
         .and_then(create_judge);
+        
+    info!("Creating route at /create/evaluation");
+
+    let create_evaluation_route = warp::path("create")
+        .and(warp::path("evaluation"))
+        .and(warp::path::end())
+        .and(warp::body::json())
+        .and(client_filter.clone())
+        .and_then(create_evaluation);
+
+    info!("Creating route at /delete/evaluation");
+
+    let delete_evaluation_route = warp::path("delete")
+        .and(warp::path("evaluation"))
+        .and(warp::path::end())
+        .and(warp::body::json())
+        .and(client_filter.clone())
+        .and_then(delete_evaluation);
 
     info!("Creating route at /auth/create");
 
@@ -134,6 +152,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .or(get_users_route)
         .or(delete_judge_route)
         .or(delete_user_route)
+        .or(create_evaluation_route)
+        .or(delete_evaluation_route)
         .or(empty_route)
         .with(cors);
 

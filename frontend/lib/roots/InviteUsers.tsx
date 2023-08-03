@@ -86,7 +86,7 @@ export const InviteUsers: React.FC = () => {
                         <th></th>
                     </tr>
                 </thead>
-                <tbody className={judgeStyles.judgeTableBody}>
+                <tbody>
                     {allUsersList && allUsersList.map((user, index) => (
                         <tr className={judgeStyles.row} key={`user-db-${index}`}>
                             <td>{user.name}</td>
