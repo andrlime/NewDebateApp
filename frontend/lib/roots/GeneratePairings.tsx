@@ -1,15 +1,15 @@
 /* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useState } from "react";
-import { Button, Switch, Table, TextInput } from '@mantine/core';
+import { Button, Flex, NumberInput, Switch, Table, TextInput } from '@mantine/core';
 import { FileInput, Paper } from '@mantine/core';
 import { DIV_DICT, RD_DICT, translate } from "../dictionaries";
 import html2canvas from "html2canvas";
 import pairStyles from './pair.module.css';
-import { IconClock, IconPhoto, IconUpload } from '@tabler/icons-react';
+import { IconClock, IconPhoto, IconSpace, IconUpload } from '@tabler/icons-react';
 import { TimeInput } from '@mantine/dates';
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/reducers/reduce";
-import { setTName } from "../store/slices/tourn";
+import { setPadding, setTName } from "../store/slices/tourn";
 
 interface IEntireRound {
     tournamentName: string;
@@ -20,7 +20,8 @@ interface IEntireRound {
     override: boolean;
     overriddenRoom: string;
     showOffline: boolean;
-    logo: string | null
+    logo: string | null;
+    asRows: boolean;
 }
 
 interface ISingleRound {
@@ -36,27 +37,28 @@ interface ISingleRound {
 
 const RoundTableRow: React.FC<ISingleRound> = ({flight, teamA, teamB, judges, overriddenRoom, override, offlineRoom, showOfflineRoom}) => {
     const [activeJudge, setActiveJudge] = useState<{name: string, id: string}>(judges[0] || {name: "BYE", id: ""});
+    const PADDING_GLOBAL_VARIABLE = `${useSelector((state: RootState) => state.tourn.padding) / 400}rem`;
 
     return (
         <tr style={{alignItems: "center", fontWeight: "normal"}}>
-            <td style={{backgroundColor: "#FEE499", border: "1px solid black", padding: "0.25rem", width: "0", color: "black", textAlign: "center", whiteSpace: "nowrap", fontWeight: "700"}}>{flight}</td>
+            <td style={{backgroundColor: "#FEE499", border: "1px solid black", padding: PADDING_GLOBAL_VARIABLE, width: "0", color: "black", textAlign: "center", whiteSpace: "nowrap", fontWeight: "700"}}>{flight}</td>
             <td style={{width: "14.2857%", border: "1px solid black", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>
-                <span style={{margin: "0.25rem", padding: "0.5rem"}}>{teamA}</span>
+                <span style={{margin: PADDING_GLOBAL_VARIABLE, padding: "0.5rem"}}>{teamA}</span>
             </td>
-            <td style={{padding: "0.25rem", border: "1px solid black", width: "14.2857%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{teamB}</td>
+            <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "14.2857%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{teamB}</td>
             {judges.length > 0 ? <>
-                <td style={{padding: "0.25rem", border: "1px solid black", width: "16.6667%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{override ? overriddenRoom : (showOfflineRoom? offlineRoom: activeJudge.id)}</td>
-                <td style={{padding: "0.25rem", border: "1px solid black", width: "fit-content", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{(judges).map((e,i) => (
+                <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "16.6667%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{override ? overriddenRoom : (showOfflineRoom? offlineRoom: activeJudge.id)}</td>
+                <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "fit-content", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{(judges).map((e,i) => (
                     <span key={e.id}><span className={pairStyles.judge} onClick={() => {
                         setActiveJudge(e);
                         let temp = judges[i];
                         judges[i] = judges[0];
                         judges[0] = temp;
-                    }} style={{cursor: "pointer", transition: "all 0.3s ease-in-out", borderRadius: "9999px"}}>{`${e.name}${i===0&&judges.length>1 ? " ©" : ""}`}</span>{i !== judges.length-1 ? ", " : ""}</span>
+                    }} style={{cursor: "pointer", transition: "all 0.3s ease-in-out", borderRadius: "9999px", fontFamily: `Georgia, "Times New Roman", Times, serif`}}>{`${e.name}${i===0&&judges.length>1 ? " ©" : ""}`}</span>{i !== judges.length-1 ? ", " : ""}</span>
                 ))}</td>
             </> : <>
-                <td style={{padding: "0.25rem", border: "1px solid black", width: "16.6667%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}></td>
-                <td style={{padding: "0.25rem", border: "1px solid black", width: "fit-content", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>BYE</td>
+                <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "16.6667%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}></td>
+                <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "fit-content", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>BYE</td>
             </>}
 
         </tr>
@@ -97,6 +99,7 @@ const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleR
         });
     }
       
+    const PADDING_GLOBAL_VARIABLE = `${useSelector((state: RootState) => state.tourn.padding) / 400}rem`;
     
     return (
         <div style={{display: "flex", flexDirection: "column", justifyContent: "center", width: "100%"}}>
@@ -106,13 +109,13 @@ const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleR
                     <span>{startTime}</span>
                 </div>
             </div>
-            <Table style={{marginTop: "0.1rem", marginBottom: "1rem", textAlign: "left", fontSize: "1.125rem", fontWeight: "bold", border: "1px solid black"}}>
+            <Table style={{marginTop: PADDING_GLOBAL_VARIABLE, marginBottom: "1rem", textAlign: "left", fontSize: "1.125rem", fontWeight: "bold", border: "1px solid black"}}>
                 <tr>
-                    <td style={{padding: "0.25rem", border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}><span style={{padding: "0.3rem"}}>Flight</span></td>
-                    <td style={{padding: "0.25rem", border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>Team</td>
-                    <td style={{padding: "0.25rem", border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>Team</td>
-                    <td style={{padding: "0.25rem", border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>Room</td>
-                    <td style={{padding: "0.25rem", border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>Judges</td>
+                    <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}><span style={{padding: "0.3rem"}}>Flight</span></td>
+                    <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>Team</td>
+                    <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>Team</td>
+                    <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>Room</td>
+                    <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>Judges</td>
                 </tr>
                 {sortedRounds.map((e,i) => (
                 <RoundTableRow key={e.teamA + "" + e.teamB} flight={e.flight} teamA={e.teamA} teamB={e.teamB} judges={e.judges} override={override} overriddenRoom={overriddenRoom} offlineRoom={e.offlineRoom} showOfflineRoom={showOffline}/>
@@ -122,7 +125,7 @@ const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleR
     )
 }
 
-const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, startTime, rounds, showOffline, logo}) => {
+const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, startTime, rounds, showOffline, logo, asRows}) => {
     const name = useSelector((state: RootState) => state.auth.name);
     const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -147,15 +150,17 @@ const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, st
         
         return `${month}/${day} @ ${hours}:${minutes}:${seconds}`;
     }
-      
 
     return (
         <div style={{color: "#003A77", width: "75%", minWidth: "1000px", display: "flex", flexDirection: "column", textAlign: "center", padding: "1.25rem", whiteSpace: "nowrap"}} id="CONTAINER_TO_EXPORT">
             <div style={{fontFamily: `Georgia, "Times New Roman", Times, serif`, fontWeight: "bold", fontSize: "3rem"}}>{divName}</div>
             <div style={{fontFamily: `Georgia, "Times New Roman", Times, serif`, fontWeight: "bold", fontSize: "2rem"}}>{rdName}</div>
 
-            <SingleFlight startTime={startTime} flightNumber={1} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/>
-            {rounds.filter(a => a.flight === "2").length > 0 ? <SingleFlight startTime={`${(parseInt(startTime.toString().substring(0,9)) + 1).toString().padStart(2, "0")}${startTime.toString().substring(2)}`} flightNumber={2} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/> : ""}
+            {/* row or col */}
+            <Flex direction={asRows ? "row" : "column"} align="flex-start" gap="md">
+                <SingleFlight startTime={startTime} flightNumber={1} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/>
+                {rounds.filter(a => a.flight === "2").length > 0 ? <SingleFlight startTime={`${(parseInt(startTime.toString().substring(0,9)) + 1).toString().padStart(2, "0")}${startTime.toString().substring(2)}`} flightNumber={2} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/> : ""}
+            </Flex>
 
             <div style={{display: "flex", flexDirection: "column", width: "100%", padding: "1rem", textAlign: "left"}}>
                 <img style={{width: "35%"}} alt={"Logo"} src={logo ? logo : "/logo.png"}/>
@@ -315,6 +320,8 @@ export const GeneratePairings: React.FC = () => {
         }
     }
 
+    const PADDING = useSelector((state: RootState) => state.tourn.padding);
+    const [showAsRows, setShowAsRows] = useState(false);
 
     return (
         <div>
@@ -329,8 +336,14 @@ export const GeneratePairings: React.FC = () => {
                 <div className={pairStyles.advOptions} onClick={() => setSao(!sao)}>{sao ? "Hide" : "Show"} Advanced Options</div>
                 {sao && <Paper withBorder p={"xs"}>
                     <div className={pairStyles.advOptionsFlex}>
+                        <NumberInput onChange={(e) => {
+                            dispatch(setPadding(e));
+                        }} value={
+                            PADDING
+                        } label="Spacing" min={10} max={100} step={10} placeholder="100 (default)" icon={<IconSpace size={"1rem"} />} />
                         <FileInput onChange={changeImage} accept="image/*" label="Custom Logo" placeholder="custom logo" icon={<IconPhoto size={"1rem"} />} />
                         <Switch checked={isOffline} onChange={(e) => setIsOffline(e.target.checked)} label={'Online mode?'} description={"Use online room IDs"}/>
+                        <Switch checked={showAsRows} onChange={(e) => setShowAsRows(e.target.checked)} label={'Show as rows?'} description={"Have Flight A and B in one row"}/>
                         <Switch disabled checked label={'Force room change?'} description={"Force change all rounds to another room"}/>
                     </div>
                 </Paper>}
@@ -346,7 +359,7 @@ export const GeneratePairings: React.FC = () => {
 
             </Paper>
 
-            {fileContent === "" ? "" : <RoundTable tournamentName={tournamentName} logo={image} divName={divName} rdName={rdName} startTime={stTime || 0} rounds={rounds} showOffline={!isOffline} override={false} overriddenRoom=""/>}
+            {fileContent === "" ? "" : <RoundTable asRows={showAsRows} tournamentName={tournamentName} logo={image} divName={divName} rdName={rdName} startTime={stTime || 0} rounds={rounds} showOffline={!isOffline} override={false} overriddenRoom=""/>}
         </div>
     );
 };
