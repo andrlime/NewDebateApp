@@ -343,7 +343,7 @@ export const GeneratePairings: React.FC = () => {
                         } label="Spacing" min={10} max={100} step={10} placeholder="100 (default)" icon={<IconSpace size={"1rem"} />} />
                         <FileInput onChange={changeImage} accept="image/*" label="Custom Logo" placeholder="custom logo" icon={<IconPhoto size={"1rem"} />} />
                         <Switch checked={isOffline} onChange={(e) => setIsOffline(e.target.checked)} label={'Online mode?'} description={"Use online room IDs"}/>
-                        <Switch checked={showAsRows} onChange={(e) => setShowAsRows(e.target.checked)} label={'Show as rows?'} description={"Have Flight A and B in one row"}/>
+                        <Switch checked={showAsRows} onChange={(e) => setShowAsRows(e.target.checked)} label={'Show as one row?'} description={"Have Flight A and B in one row"}/>
                         <Switch disabled checked label={'Force room change?'} description={"Force change all rounds to another room"}/>
                     </div>
                 </Paper>}
