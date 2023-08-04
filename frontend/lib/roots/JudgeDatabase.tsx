@@ -87,7 +87,8 @@ export const JudgeDatabase: React.FC = () => {
 
         LINES = LINES.splice(1);
         setFileLoading(true);
-        
+        let allNewJudges: Array<IJudge> = []
+       
         for(let LINE of LINES) {
             const data = LINE.split(",");
             const name = data[0];
@@ -106,27 +107,13 @@ export const JudgeDatabase: React.FC = () => {
                 university: inst,
                 paradigm: pdm,
             };
-            
+          
             axios.post(`${backendUrl}/create/judge`, req).then(res => {
                 console.log(res);
-                setJudgeList([...judgeList!, {
-                    _id: res.data.new_id,
-                    name: name,
-                    email: email,
-                    options: {
-                        nationality: nat,
-                        gender: gndr,
-                        age: "",
-                        university: inst,
-                    },
-                    paradigm: pdm,
-                    evaluations: []
-                }]);
             }).catch(err => {
                 console.error(err);
             });
         }
-
         setFileLoading(false);
     }, [fileContent]);
 
