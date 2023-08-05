@@ -167,9 +167,7 @@ export const GenerateAwards: React.FC = () => {
     const [file, setFile] = useState<File | null>(null);
     const [fileContent, setContent] = useState("");
     const [fileError, _] = useState("");
-
     const [results, setResults] = useState<Array<IResult>>([]);
-    
     const [sao, setSao] = useState(false);
     const [label, setLabel] = useState("SET ME MANUALLY");
     const [numericalOrder, setNumericalOrder] = useState(true);
@@ -223,11 +221,20 @@ export const GenerateAwards: React.FC = () => {
 
         LINES = LINES.splice(1);
         let map: { [key: string]: IResult } = {};
+        let division = "";
 
         for(let LINE of LINES) {
             let data = LINE.split(",");
-            let teamA = [data[3], data[4]];
-            let teamB = [data[5], data[6]];
+            let firstChar = parseInt(data[3].charAt(0));
+            if(firstChar < 3) {
+                division = "Middle School";
+            } else if(firstChar < 5) {
+                division = "Novice";
+            } else if(firstChar < 8) {
+                division = "Open";
+            } else {
+                division = "Varsity";
+            }
 
             let cur = map[`R${data[3]}${data[5]}`];
             if(!cur) {
@@ -243,8 +250,15 @@ export const GenerateAwards: React.FC = () => {
             map[`R${data[3]}${data[5]}`].teamAW += (data[4] === "W" ? 1 : 0)
         }
 
-        // console.log(map);
-        setResults(Object.values(map));
+        let uniqueResults = Object.values(map);
+        let numberOfTeams = uniqueResults.length * 2;
+        let log_2_length = Math.log(numberOfTeams)/Math.log(2);
+        let nextPower = Math.ceil(log_2_length) - 1;
+        let roundNameList = ["Finals", "Semifinals", "Quarterfinals", "Octofinals", "Double Octofinals", "Triple Octofinals"]
+        let isPartial = log_2_length - 1 != nextPower;
+
+        setLabel(`${division} ${isPartial ? "Partial" : ""} ${roundNameList[nextPower]}`)
+        setResults(uniqueResults);
     }, [fileContent]);
 
     const PADDING = useSelector((state: RootState) => state.tourn.padding);
