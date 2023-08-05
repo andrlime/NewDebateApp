@@ -22,6 +22,7 @@ interface IEntireRound {
     showOffline: boolean;
     logo: string | null;
     asRows: boolean;
+    hideByes: boolean;
 }
 
 interface ISingleRound {
@@ -65,7 +66,7 @@ const RoundTableRow: React.FC<ISingleRound> = ({flight, teamA, teamB, judges, ov
     );
 }
 
-const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleRound>, flightNumber: number, override: boolean, overriddenRoom: string, showOffline: boolean}> = ({startTime, rounds, flightNumber, override, overriddenRoom, showOffline}) => {
+const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleRound>, flightNumber: number, override: boolean, overriddenRoom: string, showOffline: boolean, hideByes: boolean}> = ({startTime, rounds, flightNumber, override, overriddenRoom, showOffline, hideByes}) => {
     let bgc = flightNumber === 1 ? "#003A77" : "#4A1231";
     let filteredRounds = rounds.filter((a) => a.flight == `${flightNumber}`);
     
@@ -117,15 +118,21 @@ const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleR
                     <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>Room</td>
                     <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>Judges</td>
                 </tr>
-                {sortedRounds.map((e,i) => (
-                <RoundTableRow key={e.teamA + "" + e.teamB} flight={e.flight} teamA={e.teamA} teamB={e.teamB} judges={e.judges} override={override} overriddenRoom={overriddenRoom} offlineRoom={e.offlineRoom} showOfflineRoom={showOffline}/>
-                ))}
+                {sortedRounds.map((e,i) => {
+                    if (hideByes) {
+                        if(e.offlineRoom === "BYE" && e.judges[0].id === "BYE") return;
+                    }
+
+                    return (
+                        <RoundTableRow key={e.teamA + "" + e.teamB} flight={e.flight} teamA={e.teamA} teamB={e.teamB} judges={e.judges} override={override} overriddenRoom={overriddenRoom} offlineRoom={e.offlineRoom} showOfflineRoom={showOffline}/>
+                    );
+                })}
             </Table>
         </div>
     )
 }
 
-const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, startTime, rounds, showOffline, logo, asRows}) => {
+const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, startTime, rounds, showOffline, logo, asRows, hideByes}) => {
     const name = useSelector((state: RootState) => state.auth.name);
     const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -158,8 +165,8 @@ const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, st
 
             {/* row or col */}
             <Flex direction={asRows ? "row" : "column"} align="flex-start" gap="md">
-                <SingleFlight startTime={startTime} flightNumber={1} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/>
-                {rounds.filter(a => a.flight === "2").length > 0 ? <SingleFlight startTime={`${(parseInt(startTime.toString().substring(0,9)) + 1).toString().padStart(2, "0")}${startTime.toString().substring(2)}`} flightNumber={2} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/> : ""}
+                <SingleFlight hideByes={hideByes} startTime={startTime} flightNumber={1} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/>
+                {rounds.filter(a => a.flight === "2").length > 0 ? <SingleFlight hideByes={hideByes} startTime={`${(parseInt(startTime.toString().substring(0,9)) + 1).toString().padStart(2, "0")}${startTime.toString().substring(2)}`} flightNumber={2} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/> : ""}
             </Flex>
 
             <div style={{display: "flex", flexDirection: "column", width: "100%", padding: "1rem", textAlign: "left"}}>
@@ -322,6 +329,7 @@ export const GeneratePairings: React.FC = () => {
 
     const PADDING = useSelector((state: RootState) => state.tourn.padding);
     const [showAsRows, setShowAsRows] = useState(false);
+    const [hideByes, setHideByes] = useState(false);
 
     return (
         <div>
@@ -344,6 +352,7 @@ export const GeneratePairings: React.FC = () => {
                         <FileInput onChange={changeImage} accept="image/*" label="Custom Logo" placeholder="custom logo" icon={<IconPhoto size={"1rem"} />} />
                         <Switch checked={isOffline} onChange={(e) => setIsOffline(e.target.checked)} label={'Online mode?'} description={"Use online room IDs"}/>
                         <Switch checked={showAsRows} onChange={(e) => setShowAsRows(e.target.checked)} label={'Show as one row?'} description={"Have Flight A and B in one row"}/>
+                        <Switch checked={hideByes} onChange={(e) => setHideByes(e.target.checked)} label={'Hide BYEs?'} description={"Hide BYE rounds, useful for partial elims"}/>
                         <Switch disabled checked label={'Force room change?'} description={"Force change all rounds to another room"}/>
                     </div>
                 </Paper>}
@@ -359,7 +368,7 @@ export const GeneratePairings: React.FC = () => {
 
             </Paper>
 
-            {fileContent === "" ? "" : <RoundTable asRows={showAsRows} tournamentName={tournamentName} logo={image} divName={divName} rdName={rdName} startTime={stTime || 0} rounds={rounds} showOffline={!isOffline} override={false} overriddenRoom=""/>}
+            {fileContent === "" ? "" : <RoundTable hideByes={hideByes} asRows={showAsRows} tournamentName={tournamentName} logo={image} divName={divName} rdName={rdName} startTime={stTime || 0} rounds={rounds} showOffline={!isOffline} override={false} overriddenRoom=""/>}
         </div>
     );
 };

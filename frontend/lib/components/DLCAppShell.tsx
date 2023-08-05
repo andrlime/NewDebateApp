@@ -39,7 +39,7 @@ const DLCAppShell: React.FC<{children: ReactNode, active_index: number}> = ({chi
       header={<DLCHeader/>}
     >
       <Head>
-        <title>Tabroom Tools v1.1</title>
+        <title>Tabroom Tools v1.2</title>
         <link rel="icon" type="image/x-icon" href={"icon.png"} />
       </Head>
       <div style={{height: "100%", display: "flex", flexDirection: "column"}}>

@@ -1,4 +1,4 @@
-import { IconGavel, IconArrowsDoubleNeSw, IconPercentage, IconGridPattern, IconBrain } from "@tabler/icons-react";
+import { IconGavel, IconArrowsDoubleNeSw, IconPercentage, IconGridPattern, IconBrain, IconTrophy } from "@tabler/icons-react";
 import { INavigationItem } from "./interfaces";
 
 export const NAV_BAR_DATA: Array<INavigationItem> = [
@@ -36,5 +36,12 @@ export const NAV_BAR_DATA: Array<INavigationItem> = [
         icon: IconBrain,
         desc: "Invite users",
         perm: 5
-    }
+    },
+    {
+        label: "Generate Awards",
+        to: "/awards",
+        icon: IconTrophy,
+        desc: "Generate awards",
+        perm: 2
+    },
 ];
