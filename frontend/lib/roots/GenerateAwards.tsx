@@ -114,7 +114,7 @@ const NumbersTable: React.FC<IAwardsTable> = ({tournamentName, label, data}) => 
 
     const PADDING_GLOBAL_VARIABLE = `${useSelector((state: RootState) => state.tourn.padding) / 400}rem`;
     let bgc = "#003A77";
-    let parsedData = `${data as string}`.match(/\d+/g) || [];
+    let parsedData = `${data as string}`.match(/\d+/g) || ["1"];
     parsedData = parsedData.sort((a: string, b: string) => parseInt(a) - parseInt(b));
     const COLUMN_COUNT = 4;
     const reshapedData = Array.from(
@@ -125,10 +125,31 @@ const NumbersTable: React.FC<IAwardsTable> = ({tournamentName, label, data}) => 
         )
     );
 
+    let division = "";
+    let type = parsedData[0].length === 3 ? "Speakers" : "Break";
+
+    let firstChar = parseInt(parsedData[0].charAt(0));
+    if(firstChar < 3) {
+        division = "Middle School";
+    } else if(firstChar < 5) {
+        division = "Novice";
+    } else if(firstChar < 8) {
+        division = "Open";
+    } else {
+        division = "Varsity";
+    }
+
+    let roundNameList = ["Finals", "Semifinals", "Quarterfinals", "Octofinals", "Double Octofinals", "Triple Octofinals"]
+    let numberOfTeams = parsedData.length;
+    let log_2_length = Math.log(numberOfTeams)/Math.log(2);
+    let nextPower = Math.ceil(log_2_length) - 1;
+    let roundName = "";
+    if(type === "Break") roundName = roundNameList[nextPower];
+
     return (
         <div style={{color: "#003A77", width: "75%", minWidth: "1000px", display: "flex", flexDirection: "column", textAlign: "center", padding: "1.25rem", whiteSpace: "nowrap"}} id="CONTAINER_TO_EXPORT">
             <div style={{fontFamily: `Georgia, "Times New Roman", Times, serif`, fontWeight: "bold", fontSize: "3rem"}}>{tournamentName}</div>
-            <div style={{fontFamily: `Georgia, "Times New Roman", Times, serif`, fontWeight: "bold", fontSize: "2rem"}}>{label}</div>
+            <div style={{fontFamily: `Georgia, "Times New Roman", Times, serif`, fontWeight: "bold", fontSize: "2rem"}}>{division} {roundName} {type}</div>
             
             <div style={{display: "flex", flexDirection: "column", justifyContent: "center", width: "100%"}}>
                 <Table style={{marginTop: PADDING_GLOBAL_VARIABLE, marginBottom: "1rem", textAlign: "left", fontSize: "1.125rem", border: "1px solid black"}}>
@@ -169,7 +190,7 @@ export const GenerateAwards: React.FC = () => {
     const [fileError, _] = useState("");
     const [results, setResults] = useState<Array<IResult>>([]);
     const [sao, setSao] = useState(false);
-    const [label, setLabel] = useState("SET ME MANUALLY");
+    const [label, setLabel] = useState("");
     const [numericalOrder, setNumericalOrder] = useState(true);
     const [rawNumbers, setRawNumbers] = useState("");
     const [isLoading, setIsLoading] = useState(false);
@@ -182,7 +203,7 @@ export const GenerateAwards: React.FC = () => {
         let data = document.getElementById('CONTAINER_TO_EXPORT')!
         html2canvas(data).then((canvas)=>{
             let image = canvas.toDataURL('image/png', 1.0);
-            let fileName = `${label}.png`;
+            let fileName = `AWARD-${new Date().getTime()}.png`;
             saveAs(image, fileName)
         })
 
@@ -282,10 +303,10 @@ export const GenerateAwards: React.FC = () => {
                     </Flex>
                 </Paper>
 
-                <div className={pairStyles.advOptions}>Change the words</div>
+                <div className={pairStyles.advOptions}>Options</div>
                 <Paper style={{width: "100%"}} withBorder p="md">
                     <TextInput value={tournamentName} onChange={(e) => dispatch(setTName(e.target.value))} required label="Tournament Name" placeholder="national tournament" />
-                    <TextInput value={label} onChange={(e) => setLabel(e.target.value)} required label={file ? "Round Name" : "Award Label"} placeholder="open speakers" />
+                    <TextInput value={label} onChange={(e) => setLabel(e.target.value)} required label={"Round Name"} disabled={!!rawNumbers} placeholder="open speakers" />
                 </Paper>
 
                 <div className={pairStyles.advOptions} onClick={() => setSao(!sao)}>{sao ? "Hide" : "Show"} Advanced Options</div>
@@ -312,7 +333,7 @@ export const GenerateAwards: React.FC = () => {
             </Paper>
 
             {file && <AwardsTable tournamentName={tournamentName} label={file ? `${label} Results` : label} data={results}/>}
-            {rawNumbers && <NumbersTable tournamentName={tournamentName} label={label} data={rawNumbers}/>}
+            {rawNumbers && <NumbersTable tournamentName={tournamentName} label={""} data={rawNumbers}/>}
         </div>
     );
 };
