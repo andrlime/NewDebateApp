@@ -9,9 +9,13 @@ import axios from 'axios';
 
 import { useDispatch } from 'react-redux';
 import { changeBackendUrl } from '../store/slices/env';
+import { useMediaQuery } from '@mantine/hooks';
+import { useOs } from '@mantine/hooks';
 
 const DLCAppShell: React.FC<{children: ReactNode, active_index: number}> = ({children, active_index}) => {
-  const [showNav, setShowNav] = React.useState(true);
+  // const [showNav, setShowNav] = React.useState(true);
+  const big = useMediaQuery('(min-width: 50em)');
+  const os = useOs();
 
   // get the backend url from .env file
   const dispatch = useDispatch();
@@ -24,7 +28,7 @@ const DLCAppShell: React.FC<{children: ReactNode, active_index: number}> = ({chi
   return (
     <AppShell
       padding="xs"
-      navbar={<Navbar width={{ base: showNav ? 300 : 60 }} p="xs">
+      navbar={(big && os !== "ios" && os !== "android") ? <Navbar width={{ base: 300 }} p="xs">
         <Navbar.Section>
         </Navbar.Section>
 
@@ -35,7 +39,7 @@ const DLCAppShell: React.FC<{children: ReactNode, active_index: number}> = ({chi
         <Navbar.Section>
           <UserIcon/>
         </Navbar.Section>
-      </Navbar>}
+      </Navbar> : <></>}
       header={<DLCHeader/>}
     >
       <Head>
