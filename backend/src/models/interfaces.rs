@@ -6,19 +6,10 @@ use bson::oid::ObjectId;
 // types of data
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct IEvaluation {
-    #[serde(rename = "tournamentName")]
     pub tournament_name: String,
-
-    #[serde(rename = "roundName")]
     pub round_name: String,
-
-    #[serde(rename = "isPrelim")]
     pub is_prelim: bool,
-
-    #[serde(rename = "isImprovement")]
     pub is_improvement: bool,
-    
-    #[serde(rename = "divisionName")]
     pub div_name: String,
     
     pub decision: f32,

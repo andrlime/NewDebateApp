@@ -17,18 +17,18 @@ export const getMeanAndStdev = (j: IJudge): [number, number, number] => {
   }
 
   const recents = findFourMostRecents(j);
-  const comparison = j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournamentName) ? cur.comparison : 0), 0);
-  const citation = j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournamentName) ? cur.citation : 0), 0);
-  const coverage = j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournamentName) ? cur.coverage : 0), 0);
-  const decision = j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournamentName) ? cur.decision : 0), 0);
-  const bias = j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournamentName) ? cur.bias : 0), 0);
-  const count = j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournamentName) ? 1 : 0), 0);
+  const comparison = j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.comparison : 0), 0);
+  const citation = j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.citation : 0), 0);
+  const coverage = j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.coverage : 0), 0);
+  const decision = j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.decision : 0), 0);
+  const bias = j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.bias : 0), 0);
+  const count = j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? 1 : 0), 0);
 
   const total = (comparison + citation + coverage + decision + bias);
   const meanTotal = total / count;
 
   const sumSqDiffs = j.evaluations.reduce((acc, cur) => {
-      if (recents.includes(cur.tournamentName)) {
+      if (recents.includes(cur.tournament_name)) {
           const combinedScore = cur.comparison + cur.citation + cur.coverage + cur.decision + cur.bias;
           return acc + Math.pow(combinedScore - meanTotal, 2);
       }
@@ -50,7 +50,7 @@ export const computeZ = (judge: IJudge, judges: IJudge[]): number => {
   let ARR_EVALS: number[] = [];
   judge.evaluations.forEach((e) => {
     let fmr = findFourMostRecents(judge);
-    if(fmr.includes(e.tournamentName)) {
+    if(fmr.includes(e.tournament_name)) {
       ARR_EVALS.push(e.bias+e.citation+e.comparison+e.coverage+e.decision);
     }
   });
@@ -59,7 +59,7 @@ export const computeZ = (judge: IJudge, judges: IJudge[]): number => {
   judges.forEach((f) => {
     let fmr = findFourMostRecents(f);
     f.evaluations.forEach((e) => {
-      if(fmr.includes(e.tournamentName)) {
+      if(fmr.includes(e.tournament_name)) {
         ARR_ALL_EVALS.push(e.bias+e.citation+e.comparison+e.coverage+e.decision);
       }
     });
@@ -90,9 +90,9 @@ export const findFourMostRecents = (j: IJudge) => {
   let count = 0;
   const AMOUNT_I_WANT = 4;
   for(let ev of j.evaluations) {
-    if(strings.includes(ev.tournamentName)) continue;
+    if(strings.includes(ev.tournament_name)) continue;
     else {
-      strings.push(ev.tournamentName);
+      strings.push(ev.tournament_name);
       count++;
     }
     if(count == AMOUNT_I_WANT) {
@@ -104,27 +104,27 @@ export const findFourMostRecents = (j: IJudge) => {
 }
 
 export const comparison = (j: IJudge, recents: string[]) => {
-  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournamentName) ? cur.comparison : 0), 0);
+  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.comparison : 0), 0);
 }
 
 export const citation = (j: IJudge, recents: string[]) => {
-  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournamentName) ? cur.citation : 0), 0);
+  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.citation : 0), 0);
 }
 
 export const coverage = (j: IJudge, recents: string[]) => {
-  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournamentName) ? cur.coverage : 0), 0);
+  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.coverage : 0), 0);
 }
 
 export const decision = (j: IJudge, recents: string[]) => {
-  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournamentName) ? cur.decision : 0), 0);
+  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.decision : 0), 0);
 }
 
 export const bias = (j: IJudge, recents: string[]) => {
-  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournamentName) ? cur.bias : 0), 0);
+  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.bias : 0), 0);
 }
 
 export const count = (j: IJudge, recents: string[]) => {
-  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournamentName) ? 1 : 0), 0);
+  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? 1 : 0), 0);
 }
 
 export const statsJudge = (j: IJudge, judges: IJudge[]) => {

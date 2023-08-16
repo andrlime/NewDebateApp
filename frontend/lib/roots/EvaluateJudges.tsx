@@ -89,16 +89,17 @@ export const EvaluateJudges: React.FC = () => {
                     <tr>
                         {["Name", "Comparison", "Citation", "Coverage", "Decision", "Bias", "Stdev", "N", "Total", "Z"].map((elem, index) => (
                             <th className={judgeStyles.row} onClick={() => {
-                                if(!judgeList) return;
-                                setFlip(-1 * flip);
-                                setSortBy(index);
-                                sortTable(sortFunctionList[index]);
+                                // sorting is turned off
+                                // if(!judgeList) return;
+                                // setFlip(-1 * flip);
+                                // setSortBy(index);
+                                // sortTable(sortFunctionList[index]);
                             }}>{elem}</th>
                         ))}
                     </tr>
                 </thead>
                 <tbody className={judgeStyles.judgeTableBody}>
-                    {judgeList && judgeList.filter(a => a.name.toLowerCase().includes(filter.toLowerCase()) || a.email.toLowerCase().includes(filter.toLowerCase())).map((judge, index) => (
+                    {judgeList && judgeList.filter(a => a.name.toLowerCase().includes(filter.toLowerCase())).map((judge, index) => (
                         <tr className={judgeStyles.row} onClick={() => {
                             setActiveJudge(judge);
                         }} key={`judge-eval-${index}`}>
@@ -151,45 +152,47 @@ export const EvaluateJudges: React.FC = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {activeJudge.evaluations.map((evalu, index) => (
-                        <tr style={{backgroundColor: !findFourMostRecents(activeJudge).includes(evalu.tournamentName) ? "lightgray" : ""}} key={`eval-${activeJudge.name}-${index}`}>
-                            <td>{format(new Date(Object.values(Object.values(evalu.date as Object)[0])[0] as number / 1))}</td>
-                            <td>{evalu.tournamentName}</td>
-                            <td>{evalu.roundName}</td>
-                            <td>{evalu.divisionName}</td>
-                            <td>{round(evalu.comparison,2)}</td>
-                            <td>{round(evalu.coverage,2)}</td>
-                            <td>{round(evalu.citation,2)}</td>
-                            <td>{round(evalu.decision,2)}</td>
-                            <td>{round(evalu.bias,2)}</td>
-                            <td>{round(evalu.comparison + evalu.citation + evalu.coverage + evalu.decision + evalu.bias,2)}</td>
+                    {activeJudge.evaluations.map((evalu, index) => {
+                        return (
+                            <tr style={{backgroundColor: !findFourMostRecents(activeJudge).includes(evalu.tournament_name) ? "lightgray" : ""}} key={`eval-${activeJudge.name}-${index}`}>
+                                <td>{format(new Date(Object.values(Object.values(evalu.date as Object)[0])[0] as number / 1))}</td>
+                                <td>{evalu.tournament_name}</td>
+                                <td>{evalu.round_name}</td>
+                                <td>{evalu.divisionName}</td>
+                                <td>{round(evalu.comparison,2)}</td>
+                                <td>{round(evalu.coverage,2)}</td>
+                                <td>{round(evalu.citation,2)}</td>
+                                <td>{round(evalu.decision,2)}</td>
+                                <td>{round(evalu.bias,2)}</td>
+                                <td>{round(evalu.comparison + evalu.citation + evalu.coverage + evalu.decision + evalu.bias,2)}</td>
 
-                            <td>
-                                <DeleteIcon
-                                    id={new Date(Object.values(Object.values(evalu.date as Object)[0])[0] as number / 1).getTime()}
-                                    judgeId={Object.values(activeJudge._id)[0]}
-                                    delCallback={() => {
-                                        let j = activeJudge;
-                                        j.evaluations = j.evaluations.filter(a => 
-                                            new Date(Object.values(Object.values(a.date as Object)[0])[0] as number / 1).getTime() !== new Date(Object.values(Object.values(evalu.date as Object)[0])[0] as number / 1).getTime());
+                                <td>
+                                    <DeleteIcon
+                                        id={new Date(Object.values(Object.values(evalu.date as Object)[0])[0] as number / 1).getTime()}
+                                        judgeId={Object.values(activeJudge._id)[0]}
+                                        delCallback={() => {
+                                            let j = activeJudge;
+                                            j.evaluations = j.evaluations.filter(a => 
+                                                new Date(Object.values(Object.values(a.date as Object)[0])[0] as number / 1).getTime() !== new Date(Object.values(Object.values(evalu.date as Object)[0])[0] as number / 1).getTime());
 
-                                        const judgeListCopy = [...judgeList!];
-                                        for(let judgeKey in judgeListCopy) {
-                                            if(judgeListCopy[judgeKey].email === j.email) {
-                                                judgeListCopy[judgeKey] = j;
+                                            const judgeListCopy = [...judgeList!];
+                                            for(let judgeKey in judgeListCopy) {
+                                                if(judgeListCopy[judgeKey].email === j.email) {
+                                                    judgeListCopy[judgeKey] = j;
+                                                }
                                             }
-                                        }
-                                        
-                                        setJudgeList(judgeListCopy);
-                                        setActiveJudge(j);
-                                    }}
-                                />
-                            </td>
-                        </tr>
-                    ))}
+                                            
+                                            setJudgeList(judgeListCopy);
+                                            setActiveJudge(j);
+                                        }}
+                                    />
+                                </td>
+                            </tr>
+                        );
+                    })}
                 </tbody>
             </Table>
-            <CreateEvaluation id={Object.values(activeJudge._id)[0]} impNumeral={activeJudge.evaluations.reduce((a, c) => a + (c.roundName.includes("Improvement") ? 1 : 0), 0)}
+            <CreateEvaluation id={Object.values(activeJudge._id)[0]} impNumeral={activeJudge.evaluations.reduce((a, c) => a + (c.round_name.includes("Improvement") ? 1 : 0), 0)}
                 addEval={(evalu: IEvaluation) => {
                     let j = activeJudge;
                     j.evaluations = [evalu, ...j.evaluations];

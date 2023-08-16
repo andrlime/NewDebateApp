@@ -11,10 +11,10 @@ export interface INavigationItem {
 }
 
 export interface IEvaluation {
-    tournamentName: string;
-    roundName: string;
-    isPrelim: boolean;
-    isImprovement: boolean;
+    tournament_name: string;
+    round_name: string;
+    is_prelim: boolean;
+    is_improvement: boolean;
     decision: number;
     comparison: number;
     citation: number;
