@@ -19,6 +19,7 @@ export const CreateEvaluation: React.FC<{id: string, impNumeral: number, addEval
   const [c3, sc3] = useState(0);
   const [d1, sd1] = useState(0);
   const [b1, sb1] = useState(0);
+  const [irn, sirn] = useState(impNumeral);
 
   const [loading, setLoading] = useState(false);
   const [improvement, setImprovement] = useState(false);
@@ -30,7 +31,7 @@ export const CreateEvaluation: React.FC<{id: string, impNumeral: number, addEval
         <Select disabled={improvement} value={r} onChange={(e) => sr(e || "")} label="Round Name" data={["Round 1", "Round 2", "Round 3", "Round 4", "Round 5", "Round 6", "Partial Triples", "Triples", "Partial Doubles", "Doubles", "Partial Octos", "Octos", "Partial Quarters", "Quarters", "Partial Semis", "Semis", "Finals"]} /> 
         <Select disabled={improvement} value={f} onChange={(e) => sf(e || "")} label="Flight" data={["A", "B"]} />
         <Select disabled={improvement} value={d} onChange={(e) => sd(e || "")} label="Division" data={["Novice", "MS", "Open", "Varsity"]} /> 
-        <NumberInput disabled value={impNumeral} label="Improvement Round Number" />
+        <NumberInput value={irn} onChange={(e) => sirn(e || impNumeral)} label="Improvement Round Number" />
       </Group>
       <Group p="sm">
         <NumberInput min={0} max={5} step={0.5} value={c1} onChange={e => sc1(e as unknown as number)} label={"Coverage"} />
@@ -49,8 +50,8 @@ export const CreateEvaluation: React.FC<{id: string, impNumeral: number, addEval
                 setLoading(true);
                 const req = {
                   id: id,
-                  tournament_name: improvement ? `Improvement ${impNumeral}` : tournamentName,
-                  round_name: improvement ? `Improvement ${impNumeral}` : `${r} ${f}`,
+                  tournament_name: improvement ? `Improvement ${irn}` : tournamentName,
+                  round_name: improvement ? `Improvement ${irn}` : `${r} ${f}`,
                   is_prelim: false,
                   is_improvement: improvement,
                   div_name: d,
@@ -67,11 +68,11 @@ export const CreateEvaluation: React.FC<{id: string, impNumeral: number, addEval
                   console.log(res);
                   setLoading(false);
                   addEval({
-                    tournamentName: improvement ? `Improvement ${impNumeral}` : tournamentName,
-                    roundName: improvement ? `Improvement ${impNumeral}` : `${r} ${f}`,
-                    isPrelim: false,
-                    isImprovement: improvement,
-                    divisionName: d,
+                    tournament_name: improvement ? `Improvement ${irn}` : tournamentName,
+                    round_name: improvement ? `Improvement ${irn}` : `${r} ${f}`,
+                    is_prelim: false,
+                    is_improvement: improvement,
+                    division_name: d,
                     decision: d1,
                     comparison: c2,
                     citation: c3,
