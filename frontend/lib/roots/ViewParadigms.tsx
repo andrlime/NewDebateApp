@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { IJudge } from "../interfaces";
 import { RootState } from "../store/reducers/reduce";
 import judgeStyles from './judge.module.css';
-import { Paper, ScrollArea, Table, TextInput, Title } from "@mantine/core";
+import { Flex, Paper, ScrollArea, Table, TextInput, Title } from "@mantine/core";
 import parse from 'html-react-parser';
 import axios from "axios";
 import { useMediaQuery, useOs, useScrollIntoView } from "@mantine/hooks";
@@ -63,6 +63,11 @@ export const ViewParadigms: React.FC = () => {
             <div ref={targetRef} style={{width: smallScreen ? "100%" : "50%", height: "100%", padding: "1rem"}}>
                 {activeJudge && <div>
                     <Title order={4}>{activeJudge?.name}'s Paradigm</Title>
+                    <Flex direction="row" justify="space-between" align="center">
+                        <div><span style={{fontWeight: 600}}>Nationality:</span> {activeJudge.options.nationality}</div>
+                        <div><span style={{fontWeight: 600}}>Gender:</span> {activeJudge.options.gender}</div>
+                        <div><span style={{fontWeight: 600}}>Institution:</span> {activeJudge.options.university}</div>
+                    </Flex>
                     {parse(activeJudge.paradigm || "No Paradigm")}
                     </div>}
             </div>
