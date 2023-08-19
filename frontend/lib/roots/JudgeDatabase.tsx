@@ -10,7 +10,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 
-import { Button, FileButton, Table, TextInput, Title } from "@mantine/core";
+import { Button, FileButton, ScrollArea, Table, TextInput, Title } from "@mantine/core";
 import { ActionIcon } from '@mantine/core';
 import { RichTextEditor, Link } from '@mantine/tiptap';
 import { useEditor } from '@tiptap/react';
@@ -144,66 +144,68 @@ export const JudgeDatabase: React.FC = () => {
     }
 
     const leftComponent = (
-        <div>
-            <div className={judgeStyles.label} style={{float: "right"}}>
-                <Button onClick={() => {
-                    downloadSample();
-                }} variant="outline" color="yellow" radius="xl" uppercase rightIcon={<IconDownload size="1rem" />} mx="sm">
-                    Template
-                </Button>
+        <ScrollArea h={600} type="scroll">
+            <div>
+                <div className={judgeStyles.label} style={{float: "right"}}>
+                    <Button onClick={() => {
+                        downloadSample();
+                    }} variant="outline" color="yellow" radius="xl" uppercase rightIcon={<IconDownload size="1rem" />} mx="sm">
+                        Template
+                    </Button>
 
-                <FileButton onChange={setFile} accept="image/csv">
-                    {(props) => <Button loading={fileLoading} variant="outline" color="orange" radius="xl" uppercase rightIcon={<IconUpload size="1rem" />} mx="sm" {...props}>
-                        Import
-                    </Button>}
-                </FileButton>
+                    <FileButton onChange={setFile} accept="image/csv">
+                        {(props) => <Button loading={fileLoading} variant="outline" color="orange" radius="xl" uppercase rightIcon={<IconUpload size="1rem" />} mx="sm" {...props}>
+                            Import
+                        </Button>}
+                    </FileButton>
 
-                <Button onClick={() => {
-                    setCreateMode(true);
-                    setActiveJudge(null);
-                    setActiveJudgeC(null);
-                    editor?.commands.setContent("");
-                }} variant="outline" color="red" radius="xl" uppercase rightIcon={<IconPlus size="1rem" />} mx="sm">
-                    Create
-                </Button>
-            </div>
-            <Table striped highlightOnHover withBorder withColumnBorders>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody className={judgeStyles.judgeTableBody}>
-                    {judgeList && judgeList.map((judge, index) => (
-                        <tr className={judgeStyles.row} key={`judge-db-${index}`}>
-                            <td onClick={() => {
-                                setCreateMode(false);
-                                setActiveJudge(judge);
-                                setActiveJudgeC(judge);
-                                setContent(judge.paradigm)
-                            }}>{judge.name}</td>
-                            <td onClick={() => {
-                                setCreateMode(false);
-                                setActiveJudge(judge);
-                                setActiveJudgeC(judge);
-                                setContent(judge.paradigm)
-                            }}>{judge.email}</td>
-                            <td>
-                                <DeleteIcon id={Object.values(judge._id)[0]} delCallback={(id: string) => {
-                                    setJudgeList(judgeList.filter(elem => Object.values(elem._id)[0] !== id));
-                                }} />
-                            </td>
+                    <Button onClick={() => {
+                        setCreateMode(true);
+                        setActiveJudge(null);
+                        setActiveJudgeC(null);
+                        editor?.commands.setContent("");
+                    }} variant="outline" color="red" radius="xl" uppercase rightIcon={<IconPlus size="1rem" />} mx="sm">
+                        Create
+                    </Button>
+                </div>
+                <Table striped highlightOnHover withBorder withColumnBorders>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th></th>
                         </tr>
-                    )) || <tr>
-                            <td>Loading</td>
-                            <td></td>
-                            <td></td>
-                        </tr>}
-                </tbody>
-            </Table>
-        </div>
+                    </thead>
+                    <tbody className={judgeStyles.judgeTableBody}>
+                        {judgeList && judgeList.map((judge, index) => (
+                            <tr className={judgeStyles.row} key={`judge-db-${index}`}>
+                                <td onClick={() => {
+                                    setCreateMode(false);
+                                    setActiveJudge(judge);
+                                    setActiveJudgeC(judge);
+                                    setContent(judge.paradigm)
+                                }}>{judge.name}</td>
+                                <td onClick={() => {
+                                    setCreateMode(false);
+                                    setActiveJudge(judge);
+                                    setActiveJudgeC(judge);
+                                    setContent(judge.paradigm)
+                                }}>{judge.email}</td>
+                                <td>
+                                    <DeleteIcon id={Object.values(judge._id)[0]} delCallback={(id: string) => {
+                                        setJudgeList(judgeList.filter(elem => Object.values(elem._id)[0] !== id));
+                                    }} />
+                                </td>
+                            </tr>
+                        )) || <tr>
+                                <td>Loading</td>
+                                <td></td>
+                                <td></td>
+                            </tr>}
+                    </tbody>
+                </Table>
+            </div>
+        </ScrollArea>
     );
 
     const [content, setContent_DO_NOT_USE] = useState("");
