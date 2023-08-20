@@ -10,9 +10,12 @@ ARG PORT=3030
 # Use rust container to build
 FROM rust:1.68 AS builder
 
-# Set working directory and copy src files + package manifest
 WORKDIR /usr/src/app
-COPY ./Cargo.toml ./Cargo.toml
+COPY ./Cargo.toml ./Cargo.lock ./
+RUN mkdir src && echo "fn main() { println!(\"If you see this, the build broke\") }" > src/main.rs
+RUN cargo build --release
+
+# Now copy the actual source code
 COPY ./src ./src
 
 # Build the package with optimizations
