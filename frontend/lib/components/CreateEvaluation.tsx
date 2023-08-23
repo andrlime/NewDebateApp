@@ -34,11 +34,11 @@ export const CreateEvaluation: React.FC<{id: string, impNumeral: number, addEval
         <NumberInput value={irn} onChange={(e) => sirn(e || impNumeral)} label="Improvement Round Number" />
       </Group>
       <Group p="sm">
-        <NumberInput min={0} max={5} step={0.5} value={c1} onChange={e => sc1(e as unknown as number)} label={"Coverage"} />
-        <NumberInput min={0} max={5} step={0.5} value={c2} onChange={e => sc2(e as unknown as number)} label={"Comparison"} />
-        <NumberInput min={0} max={5} step={0.5} value={c3} onChange={e => sc3(e as unknown as number)} label={"Citation"} />
-        <NumberInput min={0} max={5} step={0.5} value={d1} onChange={e => sd1(e as unknown as number)} label={"Decision"} />
-        <NumberInput min={0} max={5} step={0.5} value={b1} onChange={e => sb1(e as unknown as number)} label={"Bias"} />
+        <NumberInput precision={2} min={0} max={1} step={0.05} value={c1} onChange={e => sc1(e || 0)} label={"Coverage"} />
+        <NumberInput precision={2} min={0} max={1} step={0.05} value={c2} onChange={e => sc2(e || 0)} label={"Comparison"} />
+        <NumberInput precision={2} min={0} max={1} step={0.05} value={c3} onChange={e => sc3(e || 0)} label={"Citation"} />
+        <NumberInput precision={2} min={0} max={1} step={0.05} value={d1} onChange={e => sd1(e || 0)} label={"Decision"} />
+        <NumberInput precision={2} min={0} max={1} step={0.05} value={b1} onChange={e => sb1(e || 0)} label={"Bias"} />
       </Group>
       <Group p="sm">
         <Switch checked={improvement} onChange={(e) => setImprovement(e.target.checked)} label={"Improvement Round"} />
