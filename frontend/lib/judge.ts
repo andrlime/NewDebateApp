@@ -173,14 +173,14 @@ export const statsJudge = (j: IJudge, judges: IJudge[]) => {
   const count_j = count(j, recents);
 
   return [
-      round(comparison(j, recents),2) || 0,
-      round(citation(j, recents),2) || 0, 
-      round(coverage(j, recents),2) || 0,
-      round(decision(j, recents),2) || 0,
-      round(bias(j, recents),2) || 0,
+      round(comparison(j, recents),4) || 0,
+      round(citation(j, recents),4) || 0, 
+      round(coverage(j, recents),4) || 0,
+      round(decision(j, recents),4) || 0,
+      round(bias(j, recents),4) || 0,
       round(stdev,2) || 0,
       round(count_j,2) || 0,
-      round(mean_avg,2) || 0,
+      round(comparison(j, recents),4) + round(citation(j, recents),4) + round(coverage(j, recents),4) + round(decision(j, recents),4) + round(bias(j, recents),4) || 0,
       round(computeZ(j, judges!),2) || 0
   ];
 }

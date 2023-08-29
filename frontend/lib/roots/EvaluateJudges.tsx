@@ -103,7 +103,7 @@ export const EvaluateJudges: React.FC = () => {
                         }} key={`judge-eval-${index}`}>
                             <td className={judgeStyles.row} style={{fontWeight: 600}}>{judge.name}</td>
                             {statsJudge(judge, judgeList).map((stat, index) => (
-                                <td key={`stat-${index}-${judge.email}`}>{stat}</td>
+                                <td key={`stat-${index}-${judge.email}`}>{round(stat, 2)}</td>
                             ))}
                         </tr>
                     )) || <tr>
@@ -197,9 +197,9 @@ export const EvaluateJudges: React.FC = () => {
                         <th></th>
                         {judgeList && <>
                             {statsJudge(activeJudge, judgeList).slice(0, 5).map((number, index) => (
-                                <th key={`stat-${index}-footer`}>{number}</th>
+                                <th key={`stat-${index}-footer`}>{round(number, 2)}</th>
                             ))}
-                            <th>{statsJudge(activeJudge, judgeList).slice(0, 5).reduce((acc, cur) => acc + cur, 0)}</th>
+                            <th>{round(statsJudge(activeJudge, judgeList).slice(0, 5).reduce((acc, cur) => acc + cur, 0), 2)}</th>
                         </>}
                         <th></th>
                     </tr>
