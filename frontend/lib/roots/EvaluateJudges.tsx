@@ -42,7 +42,7 @@ const DeleteIcon: React.FC<{id: number, judgeId: string, delCallback: Function}>
 export const EvaluateJudges: React.FC = () => {
     const backendUrl = useSelector((state: RootState) => state.env.backendUrl);
     const [judgeList, setJudgeList] = useState<IJudge[]>();
-    const [sortBy, setSortBy] = useState(8)
+    const [sortBy, setSortBy] = useState(8);
     const [flip, setFlip] = useState(1);
     const [activeJudge, setActiveJudge] = useState<IJudge | null>();
 
@@ -62,8 +62,6 @@ export const EvaluateJudges: React.FC = () => {
         axios.get(`${backendUrl}/get/judges`)
             .then(res => {
                 if(res.status != 200) return;
-                console.log(res.data);
-
                 setJudgeList(res.data);
             })
             .catch(err => {
@@ -143,8 +141,8 @@ export const EvaluateJudges: React.FC = () => {
                         <th>Round</th>
                         <th>Division</th>
                         <th>Comparison</th>
-                        <th>Coverage</th>
                         <th>Citation</th>
+                        <th>Coverage</th>
                         <th>Decision</th>
                         <th>Bias</th>
                         <th>Total</th>
@@ -160,8 +158,8 @@ export const EvaluateJudges: React.FC = () => {
                                 <td>{evalu.round_name}</td>
                                 <td>{evalu.div_name}</td>
                                 <td>{round(evalu.comparison,2)}</td>
-                                <td>{round(evalu.coverage,2)}</td>
                                 <td>{round(evalu.citation,2)}</td>
+                                <td>{round(evalu.coverage,2)}</td>
                                 <td>{round(evalu.decision,2)}</td>
                                 <td>{round(evalu.bias,2)}</td>
                                 <td>{round(evalu.comparison + evalu.citation + evalu.coverage + evalu.decision + evalu.bias,2)}</td>
@@ -191,6 +189,21 @@ export const EvaluateJudges: React.FC = () => {
                         );
                     })}
                 </tbody>
+                <tfoot>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        {judgeList && <>
+                            {statsJudge(activeJudge, judgeList).slice(0, 5).map((number, index) => (
+                                <th key={`stat-${index}-footer`}>{number}</th>
+                            ))}
+                            <th>{statsJudge(activeJudge, judgeList).slice(0, 5).reduce((acc, cur) => acc + cur, 0)}</th>
+                        </>}
+                        <th></th>
+                    </tr>
+                </tfoot>
             </Table>
             <CreateEvaluation id={Object.values(activeJudge._id)[0]} impNumeral={activeJudge.evaluations.reduce((a, c) => a + (c.round_name.includes("Improvement") ? 1 : 0), 0)}
                 addEval={(evalu: IEvaluation) => {

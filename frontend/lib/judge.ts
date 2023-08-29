@@ -104,23 +104,63 @@ export const findFourMostRecents = (j: IJudge) => {
 }
 
 export const comparison = (j: IJudge, recents: string[]) => {
-  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.comparison : 0), 0);
+  let map_of_evaluations: { [key: string]: [number, number] } = {};
+  j.evaluations.map((element) => {
+    let cur = map_of_evaluations[element.tournament_name] || [0, 0];
+    cur[0] += element.comparison;
+    cur[1] ++;
+    map_of_evaluations[element.tournament_name] = cur;
+  });
+
+  return recents.reduce((acc, cur) => acc + map_of_evaluations[cur][0]/map_of_evaluations[cur][1], 0) / recents.length;
 }
 
 export const citation = (j: IJudge, recents: string[]) => {
-  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.citation : 0), 0);
+  let map_of_evaluations: { [key: string]: [number, number] } = {};
+  j.evaluations.map((element) => {
+    let cur = map_of_evaluations[element.tournament_name] || [0, 0];
+    cur[0] += element.citation;
+    cur[1] ++;
+    map_of_evaluations[element.tournament_name] = cur;
+  });
+
+  return recents.reduce((acc, cur) => acc + map_of_evaluations[cur][0]/map_of_evaluations[cur][1], 0) / recents.length;
 }
 
 export const coverage = (j: IJudge, recents: string[]) => {
-  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.coverage : 0), 0);
+  let map_of_evaluations: { [key: string]: [number, number] } = {};
+  j.evaluations.map((element) => {
+    let cur = map_of_evaluations[element.tournament_name] || [0, 0];
+    cur[0] += element.coverage;
+    cur[1] ++;
+    map_of_evaluations[element.tournament_name] = cur;
+  });
+
+  return recents.reduce((acc, cur) => acc + map_of_evaluations[cur][0]/map_of_evaluations[cur][1], 0) / recents.length;
 }
 
 export const decision = (j: IJudge, recents: string[]) => {
-  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.decision : 0), 0);
+  let map_of_evaluations: { [key: string]: [number, number] } = {};
+  j.evaluations.map((element) => {
+    let cur = map_of_evaluations[element.tournament_name] || [0, 0];
+    cur[0] += element.decision;
+    cur[1] ++;
+    map_of_evaluations[element.tournament_name] = cur;
+  });
+
+  return recents.reduce((acc, cur) => acc + map_of_evaluations[cur][0]/map_of_evaluations[cur][1], 0) / recents.length;
 }
 
 export const bias = (j: IJudge, recents: string[]) => {
-  return j.evaluations.reduce((acc, cur) => acc + (recents.includes(cur.tournament_name) ? cur.bias : 0), 0);
+  let map_of_evaluations: { [key: string]: [number, number] } = {};
+  j.evaluations.map((element) => {
+    let cur = map_of_evaluations[element.tournament_name] || [0, 0];
+    cur[0] += element.bias;
+    cur[1] ++;
+    map_of_evaluations[element.tournament_name] = cur;
+  });
+
+  return recents.reduce((acc, cur) => acc + map_of_evaluations[cur][0]/map_of_evaluations[cur][1], 0) / recents.length;
 }
 
 export const count = (j: IJudge, recents: string[]) => {
@@ -133,11 +173,11 @@ export const statsJudge = (j: IJudge, judges: IJudge[]) => {
   const count_j = count(j, recents);
 
   return [
-      round(comparison(j, recents)/count_j,2) || 0,
-      round(citation(j, recents)/count_j,2) || 0, 
-      round(coverage(j, recents)/count_j,2) || 0,
-      round(decision(j, recents)/count_j,2) || 0,
-      round(bias(j, recents)/count_j,2) || 0,
+      round(comparison(j, recents),2) || 0,
+      round(citation(j, recents),2) || 0, 
+      round(coverage(j, recents),2) || 0,
+      round(decision(j, recents),2) || 0,
+      round(bias(j, recents),2) || 0,
       round(stdev,2) || 0,
       round(count_j,2) || 0,
       round(mean_avg,2) || 0,
