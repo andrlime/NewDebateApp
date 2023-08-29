@@ -72,7 +72,7 @@ export const CreateEvaluation: React.FC<{id: string, impNumeral: number, addEval
                     round_name: improvement ? `Improvement ${irn}` : `${r} ${f}`,
                     is_prelim: false,
                     is_improvement: improvement,
-                    division_name: d,
+                    div_name: d,
                     decision: d1,
                     comparison: c2,
                     citation: c3,

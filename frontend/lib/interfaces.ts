@@ -22,7 +22,7 @@ export interface IEvaluation {
     bias: number;
     weight: number;
     date: Object;
-    divisionName: string;
+    div_name: string;
 }
 
 export interface IParadigm {

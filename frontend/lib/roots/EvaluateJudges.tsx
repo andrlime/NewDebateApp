@@ -158,7 +158,7 @@ export const EvaluateJudges: React.FC = () => {
                                 <td>{format(new Date(Object.values(Object.values(evalu.date as Object)[0])[0] as number / 1))}</td>
                                 <td>{evalu.tournament_name}</td>
                                 <td>{evalu.round_name}</td>
-                                <td>{evalu.divisionName}</td>
+                                <td>{evalu.div_name}</td>
                                 <td>{round(evalu.comparison,2)}</td>
                                 <td>{round(evalu.coverage,2)}</td>
                                 <td>{round(evalu.citation,2)}</td>
