@@ -14,6 +14,7 @@ import { CreateEvaluation } from "../components/CreateEvaluation";
 
 const DeleteIcon: React.FC<{id: number, judgeId: string, delCallback: Function}> = ({id, judgeId, delCallback}) => {
     const backendUrl = useSelector((state: RootState) => state.env.backendUrl);
+
     const [conf, setConf] = useState(false);
     const [load, setLoad] = useState(false);
     return (
@@ -45,6 +46,9 @@ export const EvaluateJudges: React.FC = () => {
     const [sortBy, setSortBy] = useState(8);
     const [flip, setFlip] = useState(1);
     const [activeJudge, setActiveJudge] = useState<IJudge | null>();
+
+    const permissionLevel = useSelector((state: RootState) => state.auth.perm);
+    const currentUserEmail = useSelector((state: RootState) => state.auth.email);
 
     const sortFunctionList = [
         (a: IJudge, b: IJudge) => a.name.localeCompare(b.name),
@@ -97,7 +101,12 @@ export const EvaluateJudges: React.FC = () => {
                     </tr>
                 </thead>
                 <tbody className={judgeStyles.judgeTableBody}>
-                    {judgeList && judgeList.filter(a => a.name.toLowerCase().includes(filter.toLowerCase())).map((judge, index) => (
+                    {judgeList && (
+                            judgeList.filter(elem => {
+                                if(permissionLevel >= 4) return true;
+                                else return elem.email == currentUserEmail;
+                            })
+                        ).filter(a => a.name.toLowerCase().includes(filter.toLowerCase())).map((judge, index) => (
                         <tr className={judgeStyles.row} onClick={() => {
                             setActiveJudge(judge);
                         }} key={`judge-eval-${index}`}>
@@ -165,7 +174,7 @@ export const EvaluateJudges: React.FC = () => {
                                 <td>{round(evalu.comparison + evalu.citation + evalu.coverage + evalu.decision + evalu.bias,2)}</td>
 
                                 <td>
-                                    <DeleteIcon
+                                    {permissionLevel >= 4 && <DeleteIcon
                                         id={new Date(Object.values(Object.values(evalu.date as Object)[0])[0] as number / 1).getTime()}
                                         judgeId={Object.values(activeJudge._id)[0]}
                                         delCallback={() => {
@@ -183,7 +192,7 @@ export const EvaluateJudges: React.FC = () => {
                                             setJudgeList(judgeListCopy);
                                             setActiveJudge(j);
                                         }}
-                                    />
+                                    />}
                                 </td>
                             </tr>
                         );
@@ -205,7 +214,7 @@ export const EvaluateJudges: React.FC = () => {
                     </tr>
                 </tfoot>
             </Table>
-            <CreateEvaluation id={Object.values(activeJudge._id)[0]} impNumeral={activeJudge.evaluations.reduce((a, c) => a + (c.round_name.includes("Improvement") ? 1 : 0), 0)}
+            {permissionLevel >= 4 && <CreateEvaluation id={Object.values(activeJudge._id)[0]} impNumeral={activeJudge.evaluations.reduce((a, c) => a + (c.round_name.includes("Improvement") ? 1 : 0), 0)}
                 addEval={(evalu: IEvaluation) => {
                     let j = activeJudge;
                     j.evaluations = [evalu, ...j.evaluations];
@@ -218,7 +227,7 @@ export const EvaluateJudges: React.FC = () => {
                     setJudgeList(judgeListCopy);
                     setActiveJudge(j);
                 }}
-            />
+            />}
         </div>}
         </div>
     );
