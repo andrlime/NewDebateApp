@@ -1,6 +1,13 @@
 import { IconGavel, IconArrowsDoubleNeSw, IconPercentage, IconGridPattern, IconBrain, IconTrophy } from "@tabler/icons-react";
 import { INavigationItem } from "./interfaces";
 
+/**
+ * 1 = public
+ * 2 = judges
+ * 3 = ?
+ * 4 = tournament staff
+ * 5 = superadmin
+ */
 export const NAV_BAR_DATA: Array<INavigationItem> = [
     {
         label: "Paradigms",
@@ -14,21 +21,21 @@ export const NAV_BAR_DATA: Array<INavigationItem> = [
         to: "/judges",
         icon: IconGavel,
         desc: "List and manage judges",
-        perm: 3
+        perm: 2
     },
     {
         label: "Generate Pairings",
         to: "/pair",
         icon: IconArrowsDoubleNeSw,
         desc: "Generate pairings",
-        perm: 2
+        perm: 4
     },
     {
         label: "Evaluate Judges",
         to: "/evaluate",
         icon: IconPercentage,
         desc: "Judge evaluation system",
-        perm: 3
+        perm: 2
     },
     {
         label: "Invite Users",
@@ -42,6 +49,6 @@ export const NAV_BAR_DATA: Array<INavigationItem> = [
         to: "/awards",
         icon: IconTrophy,
         desc: "Generate awards",
-        perm: 2
+        perm: 4
     },
 ];

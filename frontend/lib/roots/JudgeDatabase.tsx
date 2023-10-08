@@ -50,6 +50,9 @@ const DeleteIcon: React.FC<{id: string, delCallback: Function}> = ({id, delCallb
 
 export const JudgeDatabase: React.FC = () => {
     const backendUrl = useSelector((state: RootState) => state.env.backendUrl);
+    const permissionLevel = useSelector((state: RootState) => state.auth.perm);
+    const currentUserEmail = useSelector((state: RootState) => state.auth.email);
+
     const [judgeList, setJudgeList] = useState<IJudge[]>();
     const [activeJudge, setActiveJudge] = useState<IJudge | null>();
     const [activeJudgeC, setActiveJudgeC] = useState<IJudge | null>(); // a copy
@@ -146,7 +149,7 @@ export const JudgeDatabase: React.FC = () => {
     const leftComponent = (
         <ScrollArea h={600} type="scroll">
             <div>
-                <div className={judgeStyles.label} style={{float: "right"}}>
+                {permissionLevel >= 4 && <div className={judgeStyles.label} style={{float: "right"}}>
                     <Button onClick={() => {
                         downloadSample();
                     }} variant="outline" color="yellow" radius="xl" uppercase rightIcon={<IconDownload size="1rem" />} mx="sm">
@@ -167,7 +170,7 @@ export const JudgeDatabase: React.FC = () => {
                     }} variant="outline" color="red" radius="xl" uppercase rightIcon={<IconPlus size="1rem" />} mx="sm">
                         Create
                     </Button>
-                </div>
+                </div>}
                 <Table striped highlightOnHover withBorder withColumnBorders>
                     <thead>
                         <tr>
@@ -177,7 +180,12 @@ export const JudgeDatabase: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody className={judgeStyles.judgeTableBody}>
-                        {judgeList && judgeList.map((judge, index) => (
+                        {judgeList && (
+                            judgeList.filter(elem => {
+                                if(permissionLevel >= 4) return true;
+                                else return elem.email == currentUserEmail;
+                            })
+                            ).map((judge, index) => (
                             <tr className={judgeStyles.row} key={`judge-db-${index}`}>
                                 <td onClick={() => {
                                     setCreateMode(false);
@@ -192,9 +200,9 @@ export const JudgeDatabase: React.FC = () => {
                                     setContent(judge.paradigm)
                                 }}>{judge.email}</td>
                                 <td>
-                                    <DeleteIcon id={Object.values(judge._id)[0]} delCallback={(id: string) => {
+                                    {permissionLevel >= 4 && <DeleteIcon id={Object.values(judge._id)[0]} delCallback={(id: string) => {
                                         setJudgeList(judgeList.filter(elem => Object.values(elem._id)[0] !== id));
-                                    }} />
+                                    }} />}
                                 </td>
                             </tr>
                         )) || <tr>
