@@ -66,14 +66,14 @@ export const computeZ = (judge: IJudge, judges: IJudge[]): number => {
   });
 
   // find stdev for both samples
-  const SD_JUST_THIS_JUDGE = stdDev(ARR_EVALS) || 1;
-  const SD_ALL_JUDGES = stdDev(ARR_ALL_EVALS) || 1;
-  const WEIGHT_OF_JUST_ME = 0.25;
+  const SD_JUST_THIS_JUDGE = stdDev(ARR_EVALS) || 1/ARR_EVALS.length;
+  const SD_ALL_JUDGES = stdDev(ARR_ALL_EVALS) || 1/ARR_ALL_EVALS.length;
+  const WEIGHT_OF_JUST_ME = 0.5;
 
   //let denominator = (SD_ALL_JUDGES**2 * ((1/(findFourMostRecents(judge).length) + ((SD_JUST_THIS_JUDGE) + 1/(judges.reduce((acc, cur) => acc + findFourMostRecents(cur).length,0)))))) ** 0.5;
   //console.log(W_AVG_JUST_THIS_JUDGE, computeMean(judge, findFourMostRecents(judge)));
   let ZZ = (W_AVG_JUST_THIS_JUDGE - W_AVG_ALLJUDGES) / ((1-WEIGHT_OF_JUST_ME)*SD_ALL_JUDGES + WEIGHT_OF_JUST_ME*SD_JUST_THIS_JUDGE);
-  return ZZ
+  return ZZ;
 };
 
 export const findFourMostRecents = (j: IJudge) => {

@@ -46,8 +46,11 @@ export const EvaluateJudges: React.FC = () => {
     const [flip, setFlip] = useState(1);
     const [activeJudge, setActiveJudge] = useState<IJudge | null>();
 
+    const [loadedJudges, setLoadedJudges] = useState(false);
+
     const sortFunctionList = [
         (a: IJudge, b: IJudge) => a.name.localeCompare(b.name),
+        (a: IJudge, b: IJudge) => 0,
         (a: IJudge, b: IJudge) => 0,
         (a: IJudge, b: IJudge) => 0,
         (a: IJudge, b: IJudge) => 0,
@@ -62,7 +65,9 @@ export const EvaluateJudges: React.FC = () => {
         axios.get(`${backendUrl}/get/judges`)
             .then(res => {
                 if(res.status != 200) return;
-                setJudgeList(res.data);
+                
+                let sortFunction = (a: IJudge, b: IJudge) => computeZ(a, res.data) - computeZ(b, res.data);
+                setJudgeList([...res.data].sort((a,b) => sortFunction(a,b) * -1 * flip));
             })
             .catch(err => {
                 console.error(err);
@@ -70,7 +75,7 @@ export const EvaluateJudges: React.FC = () => {
     }, []);
 
     const sortTable = (sortFunction: Function) => {
-        if(!judgeList) return
+        if(!judgeList) return;
 
         let sortedList = [...judgeList].sort((a,b) => sortFunction(a,b) * flip);
         console.log(sortedList);
@@ -87,11 +92,10 @@ export const EvaluateJudges: React.FC = () => {
                     <tr>
                         {["Name", "Comparison", "Citation", "Coverage", "Decision", "Bias", "Stdev", "N", "Total", "Z"].map((elem, index) => (
                             <th className={judgeStyles.row} onClick={() => {
-                                // sorting is turned off
-                                // if(!judgeList) return;
-                                // setFlip(-1 * flip);
-                                // setSortBy(index);
-                                // sortTable(sortFunctionList[index]);
+                                if(!judgeList) return;
+                                setFlip(-1 * flip);
+                                setSortBy(index);
+                                sortTable(sortFunctionList[index]);
                             }}>{elem}</th>
                         ))}
                     </tr>
