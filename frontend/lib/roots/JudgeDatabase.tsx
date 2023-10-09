@@ -127,6 +127,18 @@ export const JudgeDatabase: React.FC = () => {
         saveAs(data, fileName)
     }
 
+    const exportData = () => {
+        let data = "name,email,nationality,gender,institution\n";
+
+        for(let judge of judgeList!) {
+            data += `${judge.name},${judge.email},${judge.options.nationality},${judge.options.gender},${judge.options.university}\n`;
+        }
+
+        data = 'data:text/csv;charset=utf-8,' + encodeURI(data);
+        let fileName = `judge_export_${new Date().toISOString()}.csv`;
+        saveAs(data, fileName)
+    }
+
     const saveAs = (blob: any, fileName: string) =>{
         let elem = window.document.createElement('a');
         elem.href = blob
@@ -152,8 +164,14 @@ export const JudgeDatabase: React.FC = () => {
                 {permissionLevel >= 4 && <div className={judgeStyles.label} style={{float: "right"}}>
                     <Button onClick={() => {
                         downloadSample();
-                    }} variant="outline" color="yellow" radius="xl" uppercase rightIcon={<IconDownload size="1rem" />} mx="sm">
+                    }} variant="outline" color="green" radius="xl" uppercase rightIcon={<IconDownload size="1rem" />} mx="sm">
                         Template
+                    </Button>
+
+                    <Button onClick={() => {
+                        exportData();
+                    }} variant="outline" color="yellow" radius="xl" uppercase rightIcon={<IconDownload size="1rem" />} mx="sm">
+                        Export
                     </Button>
 
                     <FileButton onChange={setFile} accept="image/csv">
