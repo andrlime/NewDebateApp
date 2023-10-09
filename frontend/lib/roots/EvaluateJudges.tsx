@@ -103,7 +103,19 @@ export const EvaluateJudges: React.FC = () => {
 
         data = 'data:text/csv;charset=utf-8,' + encodeURI(data);
         let fileName = `judge_stats_export_${new Date().toISOString()}.csv`;
-        saveAs(data, fileName)
+        saveAs(data, fileName);
+    }
+
+    const exportJustThisJudge = (judge: IJudge) => {
+        let data = "date,comparison,citation,coverage,decision,bias,total\n";
+
+        for(let ev of judge.evaluations) {
+            data += `${format(new Date(Object.values(Object.values(ev.date as Object)[0])[0] as number / 1))},${ev.comparison},${ev.citation},${ev.coverage},${ev.decision},${ev.bias},${ev.comparison + ev.citation + ev.coverage + ev.decision + ev.bias}\n`
+        }
+
+        data = 'data:text/csv;charset=utf-8,' + encodeURI(data);
+        let fileName = `judge_stats_export_${judge.name}_${new Date().toISOString()}.csv`;
+        saveAs(data, fileName);
     }
 
     const saveAs = (blob: any, fileName: string) =>{
@@ -190,6 +202,19 @@ export const EvaluateJudges: React.FC = () => {
                     setActiveJudge(null)
                 }} />
             </Flex>
+            {permissionLevel >= 4 && <Flex gap="sm">
+                <Button onClick={() => {
+                    exportJustThisJudge(activeJudge);
+                }} variant="outline" color="yellow" radius="xl" uppercase rightIcon={<IconDownload size="1rem" />} py="sm">
+                    Export
+                </Button>
+
+                <Button onClick={() => {
+                    // do later
+                }} disabled variant="outline" color="red" radius="xl" uppercase rightIcon={<IconDownload size="1rem" />} py="sm">
+                    Import
+                </Button>
+            </Flex>}
             <Table>
                 <thead>
                     <tr>
