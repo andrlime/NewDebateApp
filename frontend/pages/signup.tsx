@@ -108,7 +108,7 @@ const SignupPage: NextPage = () => {
       header={<DLCHeader/>}
     >
       <Head>
-        <title>Tabroom Tools v1.1</title>
+        <title>Tabroom Tools v2</title>
         <link rel="icon" type="image/x-icon" href={"icon.png"} />
       </Head>
       
