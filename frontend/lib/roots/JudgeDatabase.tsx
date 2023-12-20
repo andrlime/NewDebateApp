@@ -10,12 +10,12 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 
-import { Button, FileButton, ScrollArea, Table, TextInput, Title } from "@mantine/core";
+import { Button, FileButton, Flex, Group, ScrollArea, Table, TextInput, Title } from "@mantine/core";
 import { ActionIcon } from '@mantine/core';
 import { RichTextEditor, Link } from '@mantine/tiptap';
 import { useEditor } from '@tiptap/react';
 import { HardBreak } from '@tiptap/extension-hard-break';
-import { IconDeviceFloppy, IconDownload, IconEPassport, IconGenderAgender, IconMail, IconPlus, IconSchool, IconTextCaption, IconTrash, IconUpload } from "@tabler/icons-react";
+import { IconDeviceFloppy, IconDownload, IconEPassport, IconLocation, IconMail, IconPlus, IconSchool, IconTextCaption, IconTrash, IconUpload } from "@tabler/icons-react";
 
 import judgeStyles from "./judge.module.css";
 
@@ -158,24 +158,26 @@ export const JudgeDatabase: React.FC = () => {
         elem.remove()
     }
 
+    const [filter, setFilter] = useState("");
+
     const leftComponent = (
         <ScrollArea h={600} type="scroll">
             <div>
-                {permissionLevel >= 4 && <div className={judgeStyles.label} style={{float: "right"}}>
+                {permissionLevel >= 4 && <Flex wrap="wrap" gap="sm">
                     <Button onClick={() => {
                         downloadSample();
-                    }} variant="outline" color="green" radius="xl" uppercase rightIcon={<IconDownload size="1rem" />} mx="sm">
+                    }} variant="outline" color="green" radius="xl" uppercase rightIcon={<IconDownload size="1rem" />}>
                         Template
                     </Button>
 
                     <Button onClick={() => {
                         exportData();
-                    }} variant="outline" color="yellow" radius="xl" uppercase rightIcon={<IconDownload size="1rem" />} mx="sm">
+                    }} variant="outline" color="yellow" radius="xl" uppercase rightIcon={<IconDownload size="1rem" />}>
                         Export
                     </Button>
 
                     <FileButton onChange={setFile} accept="image/csv">
-                        {(props) => <Button loading={fileLoading} variant="outline" color="orange" radius="xl" uppercase rightIcon={<IconUpload size="1rem" />} mx="sm" {...props}>
+                        {(props) => <Button loading={fileLoading} variant="outline" color="orange" radius="xl" uppercase rightIcon={<IconUpload size="1rem" />} {...props}>
                             Import
                         </Button>}
                     </FileButton>
@@ -185,10 +187,13 @@ export const JudgeDatabase: React.FC = () => {
                         setActiveJudge(null);
                         setActiveJudgeC(null);
                         editor?.commands.setContent("");
-                    }} variant="outline" color="red" radius="xl" uppercase rightIcon={<IconPlus size="1rem" />} mx="sm">
+                    }} variant="outline" color="red" radius="xl" uppercase rightIcon={<IconPlus size="1rem" />}>
                         Create
                     </Button>
-                </div>}
+                </Flex>}
+                <Group>
+                    <TextInput style={{width: "100%"}} value={filter} onChange={(e) => setFilter(e.target.value)} placeholder="search by name, email, or location" radius="xl" py='sm' />
+                </Group>
                 <Table striped highlightOnHover withBorder withColumnBorders>
                     <thead>
                         <tr>
@@ -200,8 +205,14 @@ export const JudgeDatabase: React.FC = () => {
                     <tbody className={judgeStyles.judgeTableBody}>
                         {judgeList && (
                             judgeList.filter(elem => {
-                                if(permissionLevel >= 4) return true;
-                                else return elem.email == currentUserEmail;
+                                if(permissionLevel >= 4) {
+                                    return elem.email.toLowerCase().includes(filter.toLowerCase()) ||
+                                        elem.name.toLowerCase().includes(filter.toLowerCase()) ||
+                                        elem.options.gender.toLowerCase().includes(filter.toLowerCase());
+                                }
+                                else {
+                                    return elem.email == currentUserEmail;
+                                }
                             })
                             ).map((judge, index) => (
                             <tr className={judgeStyles.row} key={`judge-db-${index}`}>
@@ -301,7 +312,7 @@ export const JudgeDatabase: React.FC = () => {
                 } else {
                     setCreateGndr(e.target.value);
                 }
-            }} value={activeJudge?.options.gender || createGndr} label="Gender" placeholder="Non-Binary" icon={<IconGenderAgender size={"1rem"} />} />
+            }} value={activeJudge?.options.gender || createGndr} label="Location" placeholder="Earth" icon={<IconLocation size={"1rem"} />} />
             {/* <DateInput value={new Date(activeJudge.options.age) || new Date()} label="Birthday" placeholder="January 1, 2001" icon={<IconCake size={"1rem"} />} /> */}
             <TextInput onChange={(e) => {
                 if(!createMode) {

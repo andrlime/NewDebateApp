@@ -65,7 +65,6 @@ export const ViewParadigms: React.FC = () => {
                     <Title order={4}>{activeJudge?.name}'s Paradigm</Title>
                     <Flex direction="row" justify="space-between" align="center">
                         <div><span style={{fontWeight: 600}}>Nationality:</span> {activeJudge.options.nationality}</div>
-                        <div><span style={{fontWeight: 600}}>Gender:</span> {activeJudge.options.gender}</div>
                         <div><span style={{fontWeight: 600}}>Institution:</span> {activeJudge.options.university}</div>
                     </Flex>
                     {parse(activeJudge.paradigm || "No Paradigm")}
