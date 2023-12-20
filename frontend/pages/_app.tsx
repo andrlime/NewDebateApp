@@ -1,7 +1,7 @@
 import '../styles/globals.css';
 import React, { FunctionComponent } from 'react';
 import type { AppProps } from 'next/app';
-import { Provider } from 'react-redux'
+import { Provider } from 'react-redux';
 import store, { persistor } from '../lib/store/reducers/reduce';
 import { PersistGate } from 'redux-persist/integration/react';
 
