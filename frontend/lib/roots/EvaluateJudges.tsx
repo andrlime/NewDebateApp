@@ -88,7 +88,7 @@ export const EvaluateJudges: React.FC = () => {
     const [filter, setFilter] = useState("");
 
     const exportAllJudges = () => {
-        let data = "name,comparison,citation,coverage,decision,bias,stdev,total_rounds_judged,overall_average,z_score\n";
+        let data = "name,comparison,citation,structure,decision,bias,stdev,total_rounds_judged,overall_average,z_score\n";
 
         for(let judge of judgeList!) {
             data += judge.name;
@@ -107,7 +107,7 @@ export const EvaluateJudges: React.FC = () => {
     }
 
     const exportJustThisJudge = (judge: IJudge) => {
-        let data = "date,comparison,citation,coverage,decision,bias,total\n";
+        let data = "date,comparison,citation,structure,decision,bias,total\n";
 
         for(let ev of judge.evaluations) {
             data += `${format(new Date(Object.values(Object.values(ev.date as Object)[0])[0] as number / 1))},${ev.comparison},${ev.citation},${ev.coverage},${ev.decision},${ev.bias},${ev.comparison + ev.citation + ev.coverage + ev.decision + ev.bias}\n`
@@ -150,7 +150,7 @@ export const EvaluateJudges: React.FC = () => {
             <Table striped highlightOnHover withBorder withColumnBorders>
                 <thead>
                     <tr>
-                        {["Name", "Comparison", "Citation", "Coverage", "Decision", "Bias", "Stdev", "N", "Total", "Z"].map((elem, index) => (
+                        {["Name", "Comparison", "Citation", "Structure", "Decision", "Bias", "Stdev", "N", "Total", "Z"].map((elem, index) => (
                             <th className={judgeStyles.row} onClick={() => {
                                 if(!judgeList) return;
                                 setFlip(-1 * flip);
@@ -224,7 +224,7 @@ export const EvaluateJudges: React.FC = () => {
                         <th>Division</th>
                         <th>Comparison</th>
                         <th>Citation</th>
-                        <th>Coverage</th>
+                        <th>Structure</th>
                         <th>Decision</th>
                         <th>Bias</th>
                         <th>Total</th>
