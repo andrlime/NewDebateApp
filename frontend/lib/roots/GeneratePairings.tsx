@@ -76,7 +76,7 @@ const RoundTableRow: React.FC<ISingleRound> = ({flight, teamA, teamB, judges, ov
     );
 }
 
-const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleRound>, flightNumber: number, override: boolean, overriddenRoom: string, showOffline: boolean, hideByes: boolean, ldMode: boolean}> = ({startTime, rounds, flightNumber, override, overriddenRoom, showOffline, hideByes}) => {
+const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleRound>, flightNumber: number, override: boolean, overriddenRoom: string, showOffline: boolean, hideByes: boolean}> = ({startTime, rounds, flightNumber, override, overriddenRoom, showOffline, hideByes}) => {
     let bgc = flightNumber === 1 ? "#003A77" : "#4A1231";
     let filteredRounds = rounds.filter((a) => a.flight == `${flightNumber}`);
     
@@ -142,7 +142,7 @@ const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleR
     )
 }
 
-const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, startTime, rounds, showOffline, logo, asRows, hideByes, ldMode}) => {
+const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, startTime, rounds, showOffline, logo, asRows, hideByes}) => {
     const name = useSelector((state: RootState) => state.auth.name);
     const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -175,7 +175,7 @@ const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, st
 
             {/* row or col */}
             <Flex direction={asRows ? "row" : "column"} align="flex-start" gap="md">
-                <SingleFlight hideByes={hideByes} startTime={startTime} flightNumber={1} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline} ldMode={ldMode}/>
+                <SingleFlight hideByes={hideByes} startTime={startTime} flightNumber={1} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/>
                 {rounds.filter(a => a.flight === "2").length > 0 ? <SingleFlight hideByes={hideByes} startTime={`${(parseInt(startTime.toString().substring(0,9)) + 1).toString().padStart(2, "0")}${startTime.toString().substring(2)}`} flightNumber={2} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/> : ""}
             </Flex>
 
@@ -349,7 +349,7 @@ export const GeneratePairings: React.FC = () => {
 
             </Paper>
 
-            {fileContent === "" ? "" : <RoundTable hideByes={hideByes} asRows={showAsRows} tournamentName={tournamentName} logo={image} divName={divName} rdName={rdName} startTime={stTime || 0} rounds={rounds} showOffline={!isOffline} override={false} overriddenRoom="" ldMode={isSingles}/>}
+            {fileContent === "" ? "" : <RoundTable hideByes={hideByes} asRows={showAsRows} tournamentName={tournamentName} logo={image} divName={divName} rdName={rdName} startTime={stTime || 0} rounds={rounds} showOffline={!isOffline} override={false} overriddenRoom=""/>}
         </div>
     );
 };
