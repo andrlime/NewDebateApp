@@ -10,6 +10,7 @@ import { TimeInput } from '@mantine/dates';
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store/reducers/reduce";
 import { setPadding, setTName } from "../store/slices/tourn";
+import axios from "axios";
 
 interface IEntireRound {
     tournamentName: string;
@@ -34,6 +35,15 @@ interface ISingleRound {
     override?: boolean;
     overriddenRoom?: string;
     showOfflineRoom?: boolean
+}
+
+interface IRoundAPIResponse {
+    bucket: string,
+    offline_room: string,
+    flight: string,
+    first_team: string,
+    second_team: string,
+    judges: Array<string>
 }
 
 const RoundTableRow: React.FC<ISingleRound> = ({flight, teamA, teamB, judges, overriddenRoom, override, offlineRoom, showOfflineRoom}) => {
@@ -66,7 +76,7 @@ const RoundTableRow: React.FC<ISingleRound> = ({flight, teamA, teamB, judges, ov
     );
 }
 
-const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleRound>, flightNumber: number, override: boolean, overriddenRoom: string, showOffline: boolean, hideByes: boolean}> = ({startTime, rounds, flightNumber, override, overriddenRoom, showOffline, hideByes}) => {
+const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleRound>, flightNumber: number, override: boolean, overriddenRoom: string, showOffline: boolean, hideByes: boolean, ldMode: boolean}> = ({startTime, rounds, flightNumber, override, overriddenRoom, showOffline, hideByes}) => {
     let bgc = flightNumber === 1 ? "#003A77" : "#4A1231";
     let filteredRounds = rounds.filter((a) => a.flight == `${flightNumber}`);
     
@@ -132,7 +142,7 @@ const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleR
     )
 }
 
-const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, startTime, rounds, showOffline, logo, asRows, hideByes}) => {
+const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, startTime, rounds, showOffline, logo, asRows, hideByes, ldMode}) => {
     const name = useSelector((state: RootState) => state.auth.name);
     const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -165,7 +175,7 @@ const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, st
 
             {/* row or col */}
             <Flex direction={asRows ? "row" : "column"} align="flex-start" gap="md">
-                <SingleFlight hideByes={hideByes} startTime={startTime} flightNumber={1} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/>
+                <SingleFlight hideByes={hideByes} startTime={startTime} flightNumber={1} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline} ldMode={ldMode}/>
                 {rounds.filter(a => a.flight === "2").length > 0 ? <SingleFlight hideByes={hideByes} startTime={`${(parseInt(startTime.toString().substring(0,9)) + 1).toString().padStart(2, "0")}${startTime.toString().substring(2)}`} flightNumber={2} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/> : ""}
             </Flex>
 
@@ -236,10 +246,10 @@ export const GeneratePairings: React.FC = () => {
     }, [file]);
     
     useEffect(() => {
-        let LINES = fileContent.split("\n");
-        if(LINES.length < 2) return;
+        let lines = fileContent.split("\n");
+        if(lines.length < 2) return;
 
-        const METADATA = LINES[0];
+        const METADATA = lines[0];
 
         const MD_RX = /\w+/g;
         const MD_ARRAY = METADATA.match(MD_RX) || ["", ""];
@@ -249,64 +259,33 @@ export const GeneratePairings: React.FC = () => {
         setRdName(R_NAME);
 
         // now we parse rounds
-        LINES = LINES.splice(1);
+        lines = lines.splice(1);
         const allRounds: Array<ISingleRound> = [];
-        for(const L of LINES) {
-            let data = (L.substring(1, L.length-1)).split(",");
-
-            let currentRound: ISingleRound = {flight: "", teamA: "", teamB: "", judges: [], offlineRoom: ""};
-            let twoTeams = L.match(/\d{6,9}/g) || ["NO"];
-            if(twoTeams[0] == "NO") continue;
-
-            let offset = !(data[2] == twoTeams[0]) ? 1 : 0;
-
-            // clear all quotes
-            for(let i = 0; i < data.length; i ++) {
-                // remove all quotes from this datapoint
-                data[i] = data[i].replace("\"", "");
-                data[i].trim();
-            }
-
-            if(data[1] === "BYE") { // is a bye
-                // easy, just define a blank round in flight 1
-                currentRound.flight = "1";
-                currentRound.teamA = twoTeams[0];
-                currentRound.teamB = "";
-                currentRound.judges = [{name: "", id: ""}];
-                currentRound.offlineRoom = "BYE";
-            } else { // not a bye, parse normally
-                // if undefined, continue
-                if(!data[1]) continue;
-
-                // take simple meta data
-                currentRound.flight = (data[1+offset].match(/\d/g)![0]) || "0";
-                currentRound.teamA = twoTeams[0].replace("\"", "");
-                currentRound.teamB = (twoTeams[1] || "").replace("\"", "");
-                
-                // parse judges
-                let judges: Array<{name: string, id: string}> = [];
-                for(let i = 9; i < data.length - 2; i += 2) {
-                    // each element is now a judge
-                    if(!data[i]) continue;
-                    if(data[i+offset].match(/\d/g)) {
-                        judges.push({name: data[i+1+offset].replace("\"", "").trim() || "BYE", id: data[i+offset].replace("\"", "")});
-                    } else {
-                        judges.push({name: `${data[i+1+offset].replace("\"", "").trim()} ${data[i+offset].replace("\"", "")}` || "BYE", id: "BYE"});
-                    }
-
-                    currentRound.judges = judges;
+        const id_reg_expression = /([\d*]+[-])*[\d*]+/g;
+        const name_reg_expression = /\b([^\d,-]+)/g;
+        const parse_judges = (judges: Array<string>): Array<{name: string, id: string}> => {
+            return judges.map((single_judge) => {
+                return {
+                    name: (single_judge.match(name_reg_expression) || ["Judge 1"])[0],
+                    id: (single_judge.match(id_reg_expression) || ["NO ROOM ID"])[0],
                 }
+            })
+        };
 
-                if(!currentRound.judges) {
-                    currentRound.judges = [{name: "BYE", id: ""}];
-                }
-
-                let offlineRoom = data[0+offset];
-                currentRound.offlineRoom = offlineRoom.replace("\"", "");;
-
-            }
-
-            allRounds.push(currentRound);
+        for (const line of lines) {
+            if (line == "") continue;
+            console.log("calling API");
+            axios.post("https://l7nt4revr2kbgb2zbjvarynxa40mxsne.lambda-url.us-east-2.on.aws/", {csv_row: line}).then(res => {
+                let round_data: IRoundAPIResponse = res.data;
+                let currentRound: ISingleRound = {
+                    flight: (round_data.flight.match((/\d/g)) || ["1"])[0],
+                    teamA: round_data.first_team,
+                    teamB: round_data.second_team,
+                    judges: parse_judges(round_data.judges),
+                    offlineRoom: round_data.offline_room
+                };
+                allRounds.push(currentRound);
+            });
         }
 
         setRounds(allRounds);
@@ -330,6 +309,7 @@ export const GeneratePairings: React.FC = () => {
     const PADDING = useSelector((state: RootState) => state.tourn.padding);
     const [showAsRows, setShowAsRows] = useState(false);
     const [hideByes, setHideByes] = useState(false);
+    const [isSingles, setIsSingles] = useState(false);
 
     return (
         <div>
@@ -352,6 +332,7 @@ export const GeneratePairings: React.FC = () => {
                         <FileInput onChange={changeImage} accept="image/*" label="Custom Logo" placeholder="custom logo" icon={<IconPhoto size={"1rem"} />} />
                         <Switch checked={isOffline} onChange={(e) => setIsOffline(e.target.checked)} label={'Online mode?'} description={"Use online room IDs"}/>
                         <Switch checked={showAsRows} onChange={(e) => setShowAsRows(e.target.checked)} label={'Show as one row?'} description={"Have Flight A and B in one row"}/>
+                        <Switch disabled checked={isSingles} onChange={(e) => setIsSingles(e.target.checked)} label={'Lincoln Douglas?'} description={"Set for Lincoln Douglas"}/>
                         <Switch checked={hideByes} onChange={(e) => setHideByes(e.target.checked)} label={'Hide BYEs?'} description={"Hide BYE rounds, useful for partial elims"}/>
                         <Switch disabled checked label={'Force room change?'} description={"Force change all rounds to another room"}/>
                     </div>
@@ -368,7 +349,7 @@ export const GeneratePairings: React.FC = () => {
 
             </Paper>
 
-            {fileContent === "" ? "" : <RoundTable hideByes={hideByes} asRows={showAsRows} tournamentName={tournamentName} logo={image} divName={divName} rdName={rdName} startTime={stTime || 0} rounds={rounds} showOffline={!isOffline} override={false} overriddenRoom=""/>}
+            {fileContent === "" ? "" : <RoundTable hideByes={hideByes} asRows={showAsRows} tournamentName={tournamentName} logo={image} divName={divName} rdName={rdName} startTime={stTime || 0} rounds={rounds} showOffline={!isOffline} override={false} overriddenRoom="" ldMode={isSingles}/>}
         </div>
     );
 };
