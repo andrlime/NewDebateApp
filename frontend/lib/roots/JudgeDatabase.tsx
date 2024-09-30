@@ -187,6 +187,7 @@ export const JudgeDatabase: React.FC = () => {
                         setActiveJudge(null);
                         setActiveJudgeC(null);
                         editor?.commands.setContent("");
+                        notes_editor?.commands.setContent("");
                     }} variant="outline" color="red" radius="xl" uppercase rightIcon={<IconPlus size="1rem" />}>
                         Create
                     </Button>
@@ -221,12 +222,14 @@ export const JudgeDatabase: React.FC = () => {
                                     setActiveJudge(judge);
                                     setActiveJudgeC(judge);
                                     setContent(judge.paradigm)
+                                    setContentTwo(judge.notes)
                                 }}>{judge.name}</td>
                                 <td onClick={() => {
                                     setCreateMode(false);
                                     setActiveJudge(judge);
                                     setActiveJudgeC(judge);
                                     setContent(judge.paradigm)
+                                    setContentTwo(judge.notes)
                                 }}>{judge.email}</td>
                                 <td>
                                     {permissionLevel >= 4 && <DeleteIcon id={Object.values(judge._id)[0]} delCallback={(id: string) => {
@@ -246,6 +249,7 @@ export const JudgeDatabase: React.FC = () => {
     );
 
     const [content, setContent_DO_NOT_USE] = useState("");
+    const [content_two, setContentTwo_DO_NOT_USE] = useState("");
 
     
     const editor = useEditor({
@@ -257,12 +261,28 @@ export const JudgeDatabase: React.FC = () => {
             TextAlign.configure({ types: ['heading', 'paragraph'] }),
             HardBreak
         ],
-        content
+        content: content
+    });
+
+    const notes_editor = useEditor({
+        extensions: [
+            StarterKit,
+            Underline,
+            Link,
+            Highlight,
+            TextAlign.configure({ types: ['heading', 'paragraph'] }),
+            HardBreak
+        ],
+        content: content_two
     });
 
     const setContent = (content: string) => {
         setContent_DO_NOT_USE(content);
         editor?.commands.setContent(content);
+    }
+    const setContentTwo = (content: string) => {
+        setContentTwo_DO_NOT_USE(content);
+        notes_editor?.commands.setContent(content);
     }
     
     const [setLoading, setSetLoading] = useState(false);
@@ -366,9 +386,51 @@ export const JudgeDatabase: React.FC = () => {
 
                 <RichTextEditor.Content />
             </RichTextEditor>
+            <div className={judgeStyles.label}>Notes</div>
+            <RichTextEditor title="Notes" editor={notes_editor}>
+                <RichTextEditor.Toolbar sticky stickyOffset={60}>
+                    <RichTextEditor.ControlsGroup>
+                    <RichTextEditor.Bold />
+                    <RichTextEditor.Italic />
+                    <RichTextEditor.Underline />
+                    <RichTextEditor.Strikethrough />
+                    <RichTextEditor.ClearFormatting />
+                    <RichTextEditor.Highlight />
+                    <RichTextEditor.Code />
+                    </RichTextEditor.ControlsGroup>
+
+                    <RichTextEditor.ControlsGroup>
+                    <RichTextEditor.H1 />
+                    <RichTextEditor.H2 />
+                    <RichTextEditor.H3 />
+                    <RichTextEditor.H4 />
+                    </RichTextEditor.ControlsGroup>
+
+                    <RichTextEditor.ControlsGroup>
+                    <RichTextEditor.Blockquote />
+                    <RichTextEditor.Hr />
+                    <RichTextEditor.BulletList />
+                    <RichTextEditor.OrderedList />
+                    </RichTextEditor.ControlsGroup>
+
+                    <RichTextEditor.ControlsGroup>
+                    <RichTextEditor.Link />
+                    <RichTextEditor.Unlink />
+                    </RichTextEditor.ControlsGroup>
+
+                    <RichTextEditor.ControlsGroup>
+                    <RichTextEditor.AlignLeft />
+                    <RichTextEditor.AlignCenter />
+                    <RichTextEditor.AlignJustify />
+                    <RichTextEditor.AlignRight />
+                    </RichTextEditor.ControlsGroup>
+                </RichTextEditor.Toolbar>
+
+                <RichTextEditor.Content />
+            </RichTextEditor>
 
             <div className={judgeStyles.label}>
-                <Button loading={setLoading} disabled={activeJudge === activeJudgeC && editor?.getHTML() === (activeJudgeC?.paradigm || "")} onClick={() => {
+                <Button loading={setLoading} disabled={activeJudge === activeJudgeC && editor?.getHTML() === (activeJudgeC?.paradigm || "") && notes_editor?.getHTML() === (activeJudgeC?.notes || "")} onClick={() => {
                     setSetLoading(true);
 
                     if(activeJudge && !createMode) {
@@ -380,7 +442,8 @@ export const JudgeDatabase: React.FC = () => {
                             gender: activeJudge.options.gender,
                             age: activeJudge.options.age,
                             university: activeJudge.options.university,
-                            paradigm: editor?.getHTML() || ""
+                            paradigm: editor?.getHTML() || "",
+                            notes: notes_editor?.getHTML() || ""
                         };
     
                         axios.post(`${backendUrl}/update/judge`, req).then(res => {
@@ -394,7 +457,8 @@ export const JudgeDatabase: React.FC = () => {
                             gender: createGndr,
                             age: "",
                             university: createInst,
-                            paradigm: editor?.getHTML() || ""
+                            paradigm: editor?.getHTML() || "",
+                            notes: notes_editor?.getHTML() || ""
                         };
 
                         setCreateEmail("");
@@ -418,6 +482,7 @@ export const JudgeDatabase: React.FC = () => {
                                         university: createInst,
                                     },
                                     paradigm: editor?.getHTML() || "",
+                                    notes: notes_editor?.getHTML() || "",
                                     evaluations: []
                                 }]);
                             }

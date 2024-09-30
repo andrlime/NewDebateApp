@@ -218,7 +218,8 @@ pub async fn update_judge(update: BUpdateJudge, client: Arc<Mutex<Client>>) -> R
             "age": update.age.unwrap_or("".to_string()),
             "university": update.university.unwrap_or("".to_string()),
         },
-        "paradigm": update.paradigm.unwrap_or("".to_string())
+        "paradigm": update.paradigm.unwrap_or("".to_string()),
+        "notes": update.notes.unwrap_or("".to_string())
     }};
     judges.find_one_and_update(filter, update, None).await.unwrap();
     
@@ -312,6 +313,7 @@ pub async fn create_judge(new_judge: BCreateJudge, client: Arc<Mutex<Client>>) -
             university: new_judge.university.unwrap_or("".to_string())
         },
         paradigm: Some(new_judge.paradigm.unwrap_or("".to_string())),
+        notes: Some(new_judge.notes.unwrap_or("".to_string())),
     };
     
     let new_judge_doc = bson::to_bson(&new_judge).unwrap().as_document().unwrap().clone();
@@ -492,35 +494,3 @@ pub async fn create_invite_code(body: BInviteCode, client: Arc<Mutex<Client>>) -
 
     Ok(warp::reply::json(&code))
 }
-
-// // /auth/token - checks if a token is valid and returns a status code
-// pub async fn check_auth_token(body: BToken, client: Arc<Mutex<Client>>) -> Result<impl warp::Reply, Infallible> {
-//     info!("Received request at /auth/token");
-//     let client = client.lock().await;
-
-//     // get the secret key from env variables
-
-//     // destructure the token
-
-//     // check if the token is valid - in terms of time
-
-//     // if valid, return ok
-
-//     // if not valid, return not ok - signals frontend to log out / deny access
-
-// }
-
-
-// manip evaluations
-/*
-#[derive(Debug, Deserialize, Serialize)]
-pub struct BCreateEvaluation {
-    pub eval: IEvaluation,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct BDeleteEvaluation {
-    pub timestamp: String,
-}
-
-*/

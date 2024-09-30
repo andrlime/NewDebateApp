@@ -38,5 +38,6 @@ export interface IJudge {
     email: string;
     evaluations: IEvaluation[];
     paradigm: string;
+    notes: string;
     options: IParadigm;
 }

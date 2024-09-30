@@ -19,7 +19,8 @@ pub struct BUpdateJudge {
     pub gender: Option<String>,
     pub age: Option<String>,
     pub university: Option<String>,
-    pub paradigm: Option<String>
+    pub paradigm: Option<String>,
+    pub notes: Option<String>
 }
 
 #[derive(Serialize, Deserialize)]
@@ -30,7 +31,8 @@ pub struct BCreateJudge {
     pub gender: Option<String>,
     pub age: Option<String>,
     pub university: Option<String>,
-    pub paradigm: Option<String>
+    pub paradigm: Option<String>,
+    pub notes: Option<String>
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -36,6 +36,7 @@ pub struct IJudge {
     pub email: String,
     pub evaluations: Vec<IEvaluation>,
     pub paradigm: Option<String>,
+    pub notes: Option<String>,
     pub options: IParadigm
 }
 
