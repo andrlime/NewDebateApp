@@ -29,8 +29,8 @@ const DLCAppShell: React.FC<{children: ReactNode, active_index: number}> = ({chi
     <AppShell
       padding="xs"
       navbar={(big && os !== "ios" && os !== "android") ? <Navbar width={{ base: 300 }} p="xs">
-        <Navbar.Section>
-        </Navbar.Section>
+        {/* <Navbar.Section>
+        </Navbar.Section> */}
 
         <Navbar.Section grow mt="md">
           <DLCNavBar active={active_index}/>
