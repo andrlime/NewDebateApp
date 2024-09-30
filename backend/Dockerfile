@@ -3,10 +3,6 @@ FROM rust:1.68 AS builder
 
 WORKDIR /usr/src/app
 COPY ./Cargo.toml ./Cargo.lock ./
-RUN mkdir src && echo "fn main() { println!(\"If you see this, the build broke\") }" > src/main.rs
-RUN cargo build --release
-
-# Now copy the actual source code
 COPY ./src ./src
 
 # Build the package with optimizations
