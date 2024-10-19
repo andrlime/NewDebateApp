@@ -53,10 +53,10 @@ const RoundTableRow: React.FC<ISingleRound> = ({flight, teamA, teamB, judges, ov
     return (
         <tr style={{alignItems: "center", fontWeight: "normal"}}>
             <td style={{backgroundColor: "#FEE499", border: "1px solid black", padding: PADDING_GLOBAL_VARIABLE, width: "0", color: "black", textAlign: "center", whiteSpace: "nowrap", fontWeight: "700"}}>{flight}</td>
-            <td style={{width: "14.2857%", border: "1px solid black", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>
+            <td style={{width: "25%", border: "1px solid black", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>
                 <span style={{margin: PADDING_GLOBAL_VARIABLE, padding: "0.5rem"}}>{teamA}</span>
             </td>
-            <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "14.2857%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{teamB}</td>
+            <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "25%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{teamB}</td>
             {judges.length > 0 ? <>
                 <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "16.6667%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{override ? overriddenRoom : (showOfflineRoom? offlineRoom: activeJudge.id)}</td>
                 <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "fit-content", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{(judges).map((e,i) => (
@@ -69,7 +69,7 @@ const RoundTableRow: React.FC<ISingleRound> = ({flight, teamA, teamB, judges, ov
                 ))}</td>
             </> : <>
                 <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "16.6667%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}></td>
-                <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "fit-content", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>BYE</td>
+                <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "fit-content", fontFamily: `Georgia, "Times New Roman", Times, serif`, color: "black", textAlign: "center", whiteSpace: "nowrap"}}>BYE</td>
             </>}
 
         </tr>
@@ -85,14 +85,17 @@ const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleR
     if (showOffline) {
         // Sort by offlineRoom
         sortedRounds = [...filteredRounds].sort((a, b) => {
-            if (a.offlineRoom === 'BYE') return 1;
-            if (b.offlineRoom === 'BYE') return -1;
+            if (a.offlineRoom === 'BYE' || a.offlineRoom === '') return 1;
+            if (b.offlineRoom === 'BYE' || b.offlineRoom === '') return -1;
 
             return a.offlineRoom.localeCompare(b.offlineRoom);
         });
     } else {
         // Sort by ID of the first judge
         sortedRounds = [...filteredRounds].sort((a, b) => {
+            if (a.offlineRoom === 'BYE' || a.offlineRoom === '') return 1;
+            if (b.offlineRoom === 'BYE' || b.offlineRoom === '') return -1;
+
             let aJudgeId = a.judges.length ? a.judges[0].id.replace(/-/g, '') : '';
             let bJudgeId = b.judges.length ? b.judges[0].id.replace(/-/g, '') : '';
 
@@ -266,8 +269,8 @@ export const GeneratePairings: React.FC = () => {
         const parse_judges = (judges: Array<string>): Array<{name: string, id: string}> => {
             return judges.map((single_judge) => {
                 return {
-                    name: (single_judge.match(name_reg_expression) || ["Judge 1"])[0],
-                    id: (single_judge.match(id_reg_expression) || ["NO ROOM ID"])[0],
+                    name: (single_judge.match(name_reg_expression) || ["/"])[0],
+                    id: (single_judge.match(id_reg_expression) || ["BYE"])[0],
                 }
             })
         };
