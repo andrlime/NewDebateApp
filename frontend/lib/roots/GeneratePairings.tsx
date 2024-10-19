@@ -24,6 +24,7 @@ interface IEntireRound {
     logo: string | null;
     asRows: boolean;
     hideByes: boolean;
+    labels: [string, string];
 }
 
 interface ISingleRound {
@@ -52,13 +53,13 @@ const RoundTableRow: React.FC<ISingleRound> = ({flight, teamA, teamB, judges, ov
 
     return (
         <tr style={{alignItems: "center", fontWeight: "normal"}}>
-            <td style={{backgroundColor: "#FEE499", border: "1px solid black", padding: PADDING_GLOBAL_VARIABLE, width: "0", color: "black", textAlign: "center", whiteSpace: "nowrap", fontWeight: "700"}}>{flight}</td>
-            <td style={{width: "25%", border: "1px solid black", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>
+            <td style={{backgroundColor: "#FEE499", border: "1px solid black", padding: PADDING_GLOBAL_VARIABLE, width: "5%", color: "black", textAlign: "center", whiteSpace: "nowrap", fontWeight: "700"}}>{flight}</td>
+            <td style={{width: "30%", border: "1px solid black", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>
                 <span style={{margin: PADDING_GLOBAL_VARIABLE, padding: "0.5rem"}}>{teamA}</span>
             </td>
-            <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "25%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{teamB}</td>
+            <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "30%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{teamB}</td>
             {judges.length > 0 ? <>
-                <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "16.6667%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{override ? overriddenRoom : (showOfflineRoom? offlineRoom: activeJudge.id)}</td>
+                <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "15%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{override ? overriddenRoom : (showOfflineRoom? offlineRoom: activeJudge.id)}</td>
                 <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "fit-content", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}>{(judges).map((e,i) => (
                     <span key={e.id}><span className={pairStyles.judge} onClick={() => {
                         setActiveJudge(e);
@@ -68,7 +69,7 @@ const RoundTableRow: React.FC<ISingleRound> = ({flight, teamA, teamB, judges, ov
                     }} style={{cursor: "pointer", transition: "all 0.3s ease-in-out", borderRadius: "9999px", fontFamily: `Georgia, "Times New Roman", Times, serif`}}>{`${e.name}${i===0&&judges.length>1 ? " ©" : ""}`}</span>{i !== judges.length-1 ? ", " : ""}</span>
                 ))}</td>
             </> : <>
-                <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "16.6667%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}></td>
+                <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "15%", fontFamily: "inherit", color: "black", textAlign: "center", whiteSpace: "nowrap"}}></td>
                 <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", width: "fit-content", fontFamily: `Georgia, "Times New Roman", Times, serif`, color: "black", textAlign: "center", whiteSpace: "nowrap"}}>BYE</td>
             </>}
 
@@ -76,7 +77,7 @@ const RoundTableRow: React.FC<ISingleRound> = ({flight, teamA, teamB, judges, ov
     );
 }
 
-const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleRound>, flightNumber: number, override: boolean, overriddenRoom: string, showOffline: boolean, hideByes: boolean}> = ({startTime, rounds, flightNumber, override, overriddenRoom, showOffline, hideByes}) => {
+const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleRound>, flightNumber: number, override: boolean, overriddenRoom: string, showOffline: boolean, hideByes: boolean, labels: [string, string]}> = ({startTime, rounds, flightNumber, override, overriddenRoom, showOffline, hideByes, labels}) => {
     let bgc = flightNumber === 1 ? "#003A77" : "#4A1231";
     let filteredRounds = rounds.filter((a) => a.flight == `${flightNumber}`);
     
@@ -125,9 +126,9 @@ const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleR
             </div>
             <Table style={{marginTop: PADDING_GLOBAL_VARIABLE, marginBottom: "1rem", textAlign: "left", fontSize: "1.125rem", fontWeight: "bold", border: "1px solid black"}}>
                 <tr>
-                    <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}><span style={{padding: "0.3rem"}}>Flight</span></td>
-                    <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>Team</td>
-                    <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>Team</td>
+                    <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}><span style={{padding: "0.3rem"}}>Flt</span></td>
+                    <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>{labels[0]}</td>
+                    <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>{labels[1]}</td>
                     <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>Room</td>
                     <td style={{padding: PADDING_GLOBAL_VARIABLE, border: "1px solid black", backgroundColor: bgc, color: "white", fontWeight: "bold", width: "fit-content", textAlign: "center", whiteSpace: "nowrap"}}>Judges</td>
                 </tr>
@@ -145,7 +146,7 @@ const SingleFlight: React.FC<{startTime: number | string, rounds: Array<ISingleR
     )
 }
 
-const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, startTime, rounds, showOffline, logo, asRows, hideByes}) => {
+const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, startTime, rounds, showOffline, logo, asRows, hideByes, labels}) => {
     const name = useSelector((state: RootState) => state.auth.name);
     const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -178,8 +179,8 @@ const RoundTable: React.FC<IEntireRound> = ({tournamentName, divName, rdName, st
 
             {/* row or col */}
             <Flex direction={asRows ? "row" : "column"} align="flex-start" gap="md">
-                <SingleFlight hideByes={hideByes} startTime={startTime} flightNumber={1} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/>
-                {rounds.filter(a => a.flight === "2").length > 0 ? <SingleFlight hideByes={hideByes} startTime={`${(parseInt(startTime.toString().substring(0,9)) + 1).toString().padStart(2, "0")}${startTime.toString().substring(2)}`} flightNumber={2} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline}/> : ""}
+                <SingleFlight hideByes={hideByes} startTime={startTime} flightNumber={1} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline} labels={labels}/>
+                {rounds.filter(a => a.flight === "2").length > 0 ? <SingleFlight hideByes={hideByes} startTime={`${(parseInt(startTime.toString().substring(0,9)) + 1).toString().padStart(2, "0")}${startTime.toString().substring(2)}`} flightNumber={2} rounds={rounds} override={false} overriddenRoom={""} showOffline={showOffline} labels={labels}/> : ""}
             </Flex>
 
             <div style={{display: "flex", flexDirection: "column", width: "100%", padding: "1rem", textAlign: "left"}}>
@@ -312,7 +313,9 @@ export const GeneratePairings: React.FC = () => {
     const PADDING = useSelector((state: RootState) => state.tourn.padding);
     const [showAsRows, setShowAsRows] = useState(false);
     const [hideByes, setHideByes] = useState(false);
-    const [isSingles, setIsSingles] = useState(false);
+
+    const [teamALabel, setTeamALabel] = useState("Team");
+    const [teamBLabel, setTeamBLabel] = useState("Team");
 
     return (
         <div>
@@ -335,9 +338,17 @@ export const GeneratePairings: React.FC = () => {
                         <FileInput onChange={changeImage} accept="image/*" label="Custom Logo" placeholder="custom logo" icon={<IconPhoto size={"1rem"} />} />
                         <Switch checked={isOffline} onChange={(e) => setIsOffline(e.target.checked)} label={'Online mode?'} description={"Use online room IDs"}/>
                         <Switch checked={showAsRows} onChange={(e) => setShowAsRows(e.target.checked)} label={'Show as one row?'} description={"Have Flight A and B in one row"}/>
-                        <Switch disabled checked={isSingles} onChange={(e) => setIsSingles(e.target.checked)} label={'Lincoln Douglas?'} description={"Set for Lincoln Douglas"}/>
                         <Switch checked={hideByes} onChange={(e) => setHideByes(e.target.checked)} label={'Hide BYEs?'} description={"Hide BYE rounds, useful for partial elims"}/>
-                        <Switch disabled checked label={'Force room change?'} description={"Force change all rounds to another room"}/>
+                        <div className={pairStyles.advOptions}>Customize Team Labels</div>
+                        <Flex gap="md">
+                            <TextInput value={teamALabel} onChange={(e) => setTeamALabel(e.target.value)} required placeholder="Team" />
+                            <TextInput value={teamBLabel} onChange={(e) => setTeamBLabel(e.target.value)} required placeholder="Team" />
+                            <Button onClick={() => {setTeamALabel("Proposition");setTeamBLabel("Opposition")}}>Show Proposition/Opposition</Button>
+                            <Button onClick={() => {setTeamALabel("Pro");setTeamBLabel("Con")}}>Show Pro/Con</Button>
+                            <Button onClick={() => {setTeamALabel("Affirmative");setTeamBLabel("Negative")}}>Show Affirmative/Negative</Button>
+                            <Button onClick={() => {setTeamALabel("Aff");setTeamBLabel("Neg")}}>Show Aff/Neg</Button>
+                            <Button onClick={() => {setTeamALabel("Team");setTeamBLabel("Team")}}>Show Team/Team</Button>
+                        </Flex>
                     </div>
                 </Paper>}
 
@@ -352,7 +363,7 @@ export const GeneratePairings: React.FC = () => {
 
             </Paper>
 
-            {fileContent === "" ? "" : <RoundTable hideByes={hideByes} asRows={showAsRows} tournamentName={tournamentName} logo={image} divName={divName} rdName={rdName} startTime={stTime || 0} rounds={rounds} showOffline={!isOffline} override={false} overriddenRoom=""/>}
+            {fileContent === "" ? "" : <RoundTable hideByes={hideByes} asRows={showAsRows} tournamentName={tournamentName} logo={image} divName={divName} rdName={rdName} startTime={stTime || 0} rounds={rounds} showOffline={!isOffline} override={false} overriddenRoom="" labels={[teamALabel, teamBLabel]}/>}
         </div>
     );
 };
